@@ -1,0 +1,467 @@
+{
+  "technologies": [
+    {
+      "id": "wordpress",
+      "name": "WordPress",
+      "category": "cms",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "wp-content" },
+        { "source": "html", "type": "contains", "value": "wp-includes" },
+        { "source": "html", "type": "contains", "value": "wp-json" },
+        { "source": "html", "type": "contains", "value": "content=\\\"wordpress" }
+      ]
+    },
+    {
+      "id": "elementor",
+      "name": "Elementor",
+      "category": "cms",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "elementor-" },
+        { "source": "script_src", "type": "contains", "value": "elementor" }
+      ]
+    },
+    {
+      "id": "drupal",
+      "name": "Drupal",
+      "category": "cms",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "drupal.settings" },
+        { "source": "html", "type": "contains", "value": "drupal.js" }
+      ]
+    },
+    {
+      "id": "joomla",
+      "name": "Joomla",
+      "category": "cms",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "content=\\\"joomla!" }
+      ]
+    },
+    {
+      "id": "hubspot_cms",
+      "name": "HubSpot CMS",
+      "category": "cms",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "hs-scripts.com" },
+        { "source": "html", "type": "contains", "value": "hs-analytics.net" },
+        { "source": "html", "type": "contains", "value": "js.hs-analytics.net" },
+        { "source": "html", "type": "contains", "value": "js.hs-scripts.com" },
+        { "source": "html", "type": "contains", "value": "usemessages.com" }
+      ]
+    },
+
+    {
+      "id": "jquery",
+      "name": "jQuery",
+      "category": "frontend",
+      "threshold": 1,
+      "signals": [
+        { "source": "script_src", "type": "contains", "value": "jquery" }
+      ]
+    },
+    {
+      "id": "react",
+      "name": "React",
+      "category": "frontend",
+      "threshold": 1,
+      "signals": [
+        { "source": "script_src", "type": "contains", "value": "react" }
+      ]
+    },
+    {
+      "id": "angular",
+      "name": "Angular",
+      "category": "frontend",
+      "threshold": 1,
+      "signals": [
+        { "source": "script_src", "type": "contains", "value": "angular" }
+      ]
+    },
+    {
+      "id": "vue",
+      "name": "Vue.js",
+      "category": "frontend",
+      "threshold": 1,
+      "signals": [
+        { "source": "script_src", "type": "contains", "value": "vue" }
+      ]
+    },
+    {
+      "id": "swiper",
+      "name": "Swiper",
+      "category": "frontend",
+      "threshold": 1,
+      "signals": [
+        { "source": "script_src", "type": "contains", "value": "swiper" }
+      ]
+    },
+    {
+      "id": "gsap",
+      "name": "GSAP",
+      "category": "frontend",
+      "threshold": 1,
+      "signals": [
+        { "source": "script_src", "type": "contains", "value": "gsap" },
+        { "source": "script_src", "type": "contains", "value": "greensock" }
+      ]
+    },
+
+    {
+      "id": "gtm",
+      "name": "Google Tag Manager",
+      "category": "analytics",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "www.googletagmanager.com" }
+      ]
+    },
+    {
+      "id": "ga",
+      "name": "Google Analytics",
+      "category": "analytics",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "www.google-analytics.com" },
+        { "source": "html", "type": "contains", "value": "gtag(" }
+      ]
+    },
+    {
+      "id": "clarity",
+      "name": "Microsoft Clarity",
+      "category": "analytics",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "www.clarity.ms" },
+        { "source": "html", "type": "contains", "value": "clarity(" }
+      ]
+    },
+    {
+      "id": "fb_pixel",
+      "name": "Meta/Facebook Pixel",
+      "category": "analytics",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "connect.facebook.net" },
+        { "source": "html", "type": "contains", "value": "fbq(" }
+      ]
+    },
+    {
+      "id": "hotjar",
+      "name": "Hotjar",
+      "category": "analytics",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "hotjar" }
+      ]
+    },
+    {
+      "id": "recaptcha",
+      "name": "Google reCAPTCHA",
+      "category": "analytics",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "www.recaptcha.net" },
+        { "source": "html", "type": "contains", "value": "www.google.com/recaptcha" }
+      ]
+    },
+    {
+      "id": "google_ads",
+      "name": "Google Ads",
+      "category": "analytics",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "aw-" },
+        { "source": "html", "type": "contains", "value": "gtag(" }
+      ]
+    },
+    {
+      "id": "google_ads_conversion",
+      "name": "Google Ads Conversion Tracking",
+      "category": "analytics",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "www.googleadservices.com" },
+        { "source": "html", "type": "contains", "value": "conversion_async.js" }
+      ]
+    },
+    {
+      "id": "ab_tasty",
+      "name": "AB Tasty (A/B Testing)",
+      "category": "analytics",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "abtasty.com" }
+      ]
+    },
+    {
+      "id": "hubspot_analytics",
+      "name": "HubSpot Analytics",
+      "category": "analytics",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "hs-analytics.net" },
+        { "source": "html", "type": "contains", "value": "js.hs-analytics.net" }
+      ]
+    },
+
+    {
+      "id": "cloudflare_cdn",
+      "name": "Cloudflare",
+      "category": "cdn",
+      "threshold": 1,
+      "signals": [
+        { "source": "header", "type": "contains", "key": "Server", "value": "cloudflare" },
+        { "source": "header_key", "type": "prefix", "value": "cf-" },
+        { "source": "dns_cname", "type": "contains", "value": "cloudflare" },
+        { "source": "dns_rdns", "type": "contains", "value": "cloudflare" }
+      ]
+    },
+    {
+      "id": "cloudfront_cdn",
+      "name": "AWS / CloudFront",
+      "category": "cdn",
+      "threshold": 1,
+      "signals": [
+        { "source": "dns_cname", "type": "contains", "value": "cloudfront" },
+        { "source": "dns_cname", "type": "contains", "value": "amazonaws" }
+      ]
+    },
+    {
+      "id": "gcp_hosting",
+      "name": "Google Cloud (guess)",
+      "category": "hosting",
+      "threshold": 1,
+      "signals": [
+        { "source": "dns_rdns", "type": "contains", "value": "google" },
+        { "source": "dns_cname", "type": "contains", "value": "google" }
+      ]
+    },
+    {
+      "id": "hubspot_hosting_ip",
+      "name": "HubSpot (guess)",
+      "category": "hosting",
+      "threshold": 1,
+      "signals": [
+        { "source": "ip", "type": "prefix", "value": "199.60.103." }
+      ]
+    },
+
+    {
+      "id": "backend_nginx",
+      "name": "nginx",
+      "category": "backend",
+      "threshold": 1,
+      "signals": [
+        { "source": "header", "type": "contains", "key": "Server", "value": "nginx" }
+      ]
+    },
+    {
+      "id": "backend_apache",
+      "name": "Apache",
+      "category": "backend",
+      "threshold": 1,
+      "signals": [
+        { "source": "header", "type": "contains", "key": "Server", "value": "apache" }
+      ]
+    },
+    {
+      "id": "backend_iis",
+      "name": "Microsoft IIS",
+      "category": "backend",
+      "threshold": 1,
+      "signals": [
+        { "source": "header", "type": "contains", "key": "Server", "value": "microsoft-iis" }
+      ]
+    },
+    {
+      "id": "backend_litespeed",
+      "name": "LiteSpeed",
+      "category": "backend",
+      "threshold": 1,
+      "signals": [
+        { "source": "header", "type": "contains", "key": "Server", "value": "litespeed" }
+      ]
+    },
+
+    {
+      "id": "dmcc_favicon_example",
+      "name": "DMCC Custom Favicon",
+      "category": "fingerprint",
+      "threshold": 1,
+      "signals": [
+        { "source": "favicon_mmh3", "type": "equals", "value": "3546500281" }
+      ]
+    },
+    {
+      "id": "express",
+      "name": "Express (Node.js)",
+      "category": "backend",
+      "threshold": 1,
+      "signals": [
+        { "source": "header", "key": "X-Powered-By", "type": "contains", "value": "express" },
+        { "source": "header_key", "type": "contains", "value": "x-powered-by" }
+      ]
+    },
+    {
+      "id": "php",
+      "name": "PHP",
+      "category": "backend",
+      "threshold": 1,
+      "signals": [
+        { "source": "header_key", "type": "contains", "value": "x-powered-by" },
+        { "source": "header", "key": "X-Powered-By", "type": "contains", "value": "php" }
+      ]
+    },
+    {
+      "id": "laravel",
+      "name": "Laravel",
+      "category": "backend",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "laravel" },
+        { "source": "header", "key": "X-Powered-By", "type": "contains", "value": "php" }
+      ]
+    },
+    {
+      "id": "django",
+      "name": "Django",
+      "category": "backend",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "csrfmiddlewaretoken" },
+        { "source": "header_key", "type": "contains", "value": "x-frame-options" }
+      ]
+    },
+    {
+      "id": "nextjs",
+      "name": "Next.js",
+      "category": "frontend",
+      "threshold": 1,
+      "signals": [
+        { "source": "script_src", "type": "contains", "value": "_next" },
+        { "source": "html", "type": "contains", "value": "__next" }
+      ]
+    },
+    {
+      "id": "vercel",
+      "name": "Vercel (hosting)",
+      "category": "hosting",
+      "threshold": 1,
+      "signals": [
+        { "source": "dns_cname", "type": "contains", "value": "vercel" },
+        { "source": "header_key", "type": "contains", "value": "x-vercel-id" }
+      ]
+    },
+    {
+      "id": "netlify",
+      "name": "Netlify (hosting)",
+      "category": "hosting",
+      "threshold": 1,
+      "signals": [
+        { "source": "dns_cname", "type": "contains", "value": "netlify" },
+        { "source": "header_key", "type": "contains", "value": "x-nf-request-id" }
+      ]
+    },
+    {
+      "id": "shopify",
+      "name": "Shopify",
+      "category": "cms",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "cdn.shopify.com" },
+        { "source": "script_src", "type": "contains", "value": "cdn.shopify" }
+      ]
+    },
+    {
+      "id": "squarespace",
+      "name": "Squarespace",
+      "category": "cms",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "squarespace" },
+        { "source": "html", "type": "contains", "value": "static.squarespace.com" }
+      ]
+    },
+    {
+      "id": "wix",
+      "name": "Wix",
+      "category": "cms",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "wix.com" },
+        { "source": "html", "type": "contains", "value": "static.wixstatic.com" }
+      ]
+    },
+    {
+      "id": "tailwind",
+      "name": "Tailwind CSS",
+      "category": "frontend",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "tailwindcss" }
+      ]
+    },
+    {
+      "id": "bootstrap",
+      "name": "Bootstrap",
+      "category": "frontend",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "bootstrap" }
+      ]
+    },
+    {
+      "id": "fastly",
+      "name": "Fastly",
+      "category": "cdn",
+      "threshold": 1,
+      "signals": [
+        { "source": "header_key", "type": "contains", "value": "x-fastly-request-id" },
+        { "source": "dns_rdns", "type": "contains", "value": "fastly" }
+      ]
+    },
+    {
+      "id": "akamai",
+      "name": "Akamai",
+      "category": "cdn",
+      "threshold": 1,
+      "signals": [
+        { "source": "dns_cname", "type": "contains", "value": "akamai" },
+        { "source": "dns_rdns", "type": "contains", "value": "akamai" }
+      ]
+    },
+    {
+      "id": "firebase_hosting",
+      "name": "Firebase Hosting",
+      "category": "hosting",
+      "threshold": 1,
+      "signals": [
+        { "source": "dns_cname", "type": "contains", "value": "firebaseapp" },
+        { "source": "dns_cname", "type": "contains", "value": "web.app" }
+      ]
+    },
+    {
+      "id": "heroku",
+      "name": "Heroku",
+      "category": "hosting",
+      "threshold": 1,
+      "signals": [
+        { "source": "dns_cname", "type": "contains", "value": "herokuapp" }
+      ]
+    },
+    {
+      "id": "digitalocean",
+      "name": "DigitalOcean (guess)",
+      "category": "hosting",
+      "threshold": 1,
+      "signals": [
+        { "source": "dns_rdns", "type": "contains", "value": "digitalocean" }
+      ]
+    }
+  ]
+}
