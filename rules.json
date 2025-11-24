@@ -462,6 +462,56 @@
       "signals": [
         { "source": "dns_rdns", "type": "contains", "value": "digitalocean" }
       ]
+    },
+    {
+      "id": "svelte",
+      "name": "Svelte",
+      "category": "frontend",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "data-svelte-h" },
+        { "source": "script_src", "type": "contains", "value": "svelte" }
+      ]
+    },
+    {
+      "id": "nuxt",
+      "name": "Nuxt.js",
+      "category": "frontend",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "window.__NUXT__" },
+        { "source": "script_src", "type": "contains", "value": "_nuxt" }
+      ]
+    },
+    {
+      "id": "astro",
+      "name": "Astro",
+      "category": "frontend",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "data-astro-cid" },
+        { "source": "html", "type": "contains", "value": "astro-island" }
+      ]
+    },
+    {
+      "id": "woocommerce",
+      "name": "WooCommerce",
+      "category": "cms",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "woocommerce" },
+        { "source": "script_src", "type": "contains", "value": "wc-cart-fragments" }
+      ]
+    },
+    {
+      "id": "magento",
+      "name": "Magento",
+      "category": "cms",
+      "threshold": 1,
+      "signals": [
+        { "source": "html", "type": "contains", "value": "Mage.Cookies" },
+        { "source": "html", "type": "contains", "value": "Magento" }
+      ]
     }
   ]
 }
