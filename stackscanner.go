@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha1"
 	"crypto/tls"
 	"encoding/hex"
@@ -85,16 +86,18 @@ func main() {
 		verbose  bool
 		asJSON   bool
 		rulesPath string
+		timeout   time.Duration
 	)
 
 	flag.BoolVar(&verbose, "v", false, "verbose mode (debug logs to stderr)")
 	flag.BoolVar(&asJSON, "json", false, "output JSON instead of human-readable text")
 	flag.StringVar(&rulesPath, "rules", "rules.json", "path to rules JSON file")
+	flag.DurationVar(&timeout, "timeout", 60*time.Second, "overall scan timeout (DNS + HTTP)")
 	flag.Parse()
 
 	if flag.NArg() < 1 {
 		fmt.Println("Usage:")
-		fmt.Println("  stackscanner_rules [-v] [-json] [-rules rules.json] <url>")
+		fmt.Println("  stackscanner_rules [-v] [-json] [-rules rules.json] [-timeout 60s] <url>")
 		os.Exit(1)
 	}
 
@@ -113,7 +116,19 @@ func main() {
 		log.Printf("[*] Scanning target: %s\n", target)
 	}
 
-	info, err := scan(target, verbose, rules)
+	if timeout <= 0 {
+		timeout = 60 * time.Second
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	httpTimeout := timeout - 5*time.Second
+	if httpTimeout <= 0 {
+		httpTimeout = timeout
+	}
+
+	info, err := scan(ctx, target, verbose, rules, httpTimeout)
 	if err != nil {
 		log.Fatalf("scan failed: %v\n", err)
 	}
@@ -161,12 +176,8 @@ func loadRules(path string) (*RulesFile, error) {
 
 func applyRules(env *ScanEnv, rules *RulesFile) map[string][]string {
 	scores := make(map[string]int)
-	categories := make(map[string]string)
-	names := make(map[string]string)
 
 	for _, tech := range rules.Technologies {
-		categories[tech.ID] = tech.Category
-		names[tech.ID] = tech.Name
 		for _, sig := range tech.Signals {
 			if matchSignal(env, sig) {
 				scores[tech.ID] += max(sig.Weight, 1)
@@ -273,13 +284,23 @@ func max(a, b int) int {
 
 // ===== Scanner Core =====
 
-func scan(rawURL string, verbose bool, rules *RulesFile) (*TechStack, error) {
+func scan(ctx context.Context, rawURL string, verbose bool, rules *RulesFile, httpTimeout time.Duration) (*TechStack, error) {
 	normalized := normalizeURL(rawURL)
 	if verbose {
 		log.Printf("[*] Normalized URL: %s\n", normalized)
 	}
 
-	resp, err := fetch(normalized)
+	httpClient := newHTTPClient(httpTimeout)
+
+	resp, err := fetch(ctx, httpClient, normalized)
+	if err != nil && strings.HasPrefix(normalized, "https://") {
+		fallback := "http://" + strings.TrimPrefix(normalized, "https://")
+		if verbose {
+			log.Printf("[!] HTTPS fetch failed (%v), retrying with HTTP: %s\n", err, fallback)
+		}
+		resp, err = fetch(ctx, httpClient, fallback)
+		normalized = fallback
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -309,13 +330,20 @@ func scan(rawURL string, verbose bool, rules *RulesFile) (*TechStack, error) {
 	}
 	scriptSrcs := extractScriptSrcs(doc)
 
-	ips, cname, reverse := dnsLookup(host, verbose)
-	tlsValid, tlsIssuer := checkTLS(host)
+	ips, cname, reverse, dnsErr := dnsLookup(ctx, host, verbose)
+	if dnsErr != nil {
+		return nil, fmt.Errorf("dns lookup failed: %w", dnsErr)
+	}
+
+	tlsValid, tlsIssuer, tlsErr := checkTLS(ctx, host)
+	if tlsErr != nil && verbose {
+		log.Printf("[!] TLS check error: %v\n", tlsErr)
+	}
 	if verbose {
 		log.Printf("[*] TLS: valid=%v issuer=%s\n", tlsValid, tlsIssuer)
 	}
 
-	favSHA, favMMH, _ := hashFavicon(finalURL, verbose)
+	favSHA, favMMH, _ := hashFavicon(ctx, httpClient, finalURL, verbose)
 
 	env := &ScanEnv{
 		HTML:       htmlLower,
@@ -376,11 +404,29 @@ func normalizeURL(target string) string {
 	return target
 }
 
-func fetch(target string) (*http.Response, error) {
-	client := &http.Client{
-		Timeout: 15 * time.Second,
+func newHTTPClient(timeout time.Duration) *http.Client {
+	if timeout <= 0 {
+		timeout = 60 * time.Second
 	}
-	req, err := http.NewRequest("GET", target, nil)
+
+	return &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+			DialContext: (&net.Dialer{
+				Timeout:   15 * time.Second,
+				KeepAlive: 30 * time.Second,
+			}).DialContext,
+			TLSHandshakeTimeout:   15 * time.Second,
+			ResponseHeaderTimeout: timeout,
+			ExpectContinueTimeout: 1 * time.Second,
+			IdleConnTimeout:       30 * time.Second,
+		},
+		Timeout: timeout,
+	}
+}
+
+func fetch(ctx context.Context, client *http.Client, target string) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", target, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -406,21 +452,31 @@ func extractScriptSrcs(doc *goquery.Document) []string {
 	return srcs
 }
 
-func dnsLookup(host string, verbose bool) ([]string, string, []string) {
+func dnsLookup(ctx context.Context, host string, verbose bool) ([]string, string, []string, error) {
 	var ips []string
 	var rdns []string
 	if host == "" {
-		return ips, "", rdns
+		return ips, "", rdns, fmt.Errorf("empty host")
 	}
 
-	cname, _ := net.LookupCNAME(host)
+	resolver := &net.Resolver{}
+	cname, cnameErr := resolver.LookupCNAME(ctx, host)
+	if cnameErr != nil && verbose {
+		log.Printf("[!] DNS cname lookup error: %v\n", cnameErr)
+	}
 
-	ipObjs, _ := net.LookupIP(host)
-	for _, ip := range ipObjs {
-		if ipv4 := ip.To4(); ipv4 != nil {
+	ipAddrs, ipErr := resolver.LookupIPAddr(ctx, host)
+	if ipErr != nil {
+		return ips, cname, rdns, ipErr
+	}
+	for _, ip := range ipAddrs {
+		if ipv4 := ip.IP.To4(); ipv4 != nil {
 			s := ipv4.String()
 			ips = append(ips, s)
-			ptrs, _ := net.LookupAddr(s)
+			ptrs, ptrErr := resolver.LookupAddr(ctx, s)
+			if ptrErr != nil && verbose {
+				log.Printf("[!] rDNS lookup error for %s: %v\n", s, ptrErr)
+			}
 			for _, p := range ptrs {
 				rdns = append(rdns, strings.TrimSuffix(p, "."))
 			}
@@ -434,30 +490,41 @@ func dnsLookup(host string, verbose bool) ([]string, string, []string) {
 		log.Printf("[*] DNS: cname=%s ips=%v rdns=%v\n", cname, ips, rdns)
 	}
 
-	return ips, cname, rdns
+	return ips, cname, rdns, nil
 }
 
-func checkTLS(host string) (bool, string) {
+func checkTLS(ctx context.Context, host string) (bool, string, error) {
 	if host == "" {
-		return false, ""
+		return false, "", fmt.Errorf("empty host")
 	}
-	conn, err := tls.Dial("tcp", host+":443", &tls.Config{
-		ServerName: host,
-	})
+	dialer := &tls.Dialer{
+		NetDialer: &net.Dialer{
+			Timeout: 5 * time.Second,
+		},
+		Config: &tls.Config{
+			ServerName: host,
+		},
+	}
+	conn, err := dialer.DialContext(ctx, "tcp", host+":443")
 	if err != nil {
-		return false, ""
+		return false, "", err
 	}
 	defer conn.Close()
 
-	state := conn.ConnectionState()
+	tlsConn, ok := conn.(*tls.Conn)
+	if !ok {
+		return false, "", fmt.Errorf("unexpected connection type for TLS")
+	}
+
+	state := tlsConn.ConnectionState()
 	if len(state.PeerCertificates) > 0 {
 		cert := state.PeerCertificates[0]
-		return true, cert.Issuer.CommonName
+		return true, cert.Issuer.CommonName, nil
 	}
-	return true, ""
+	return true, "", nil
 }
 
-func hashFavicon(pageURL string, verbose bool) (string, uint32, string) {
+func hashFavicon(ctx context.Context, client *http.Client, pageURL string, verbose bool) (string, uint32, string) {
 	u, err := url.Parse(pageURL)
 	if err != nil || u.Scheme == "" || u.Host == "" {
 		if verbose {
@@ -473,8 +540,10 @@ func hashFavicon(pageURL string, verbose bool) (string, uint32, string) {
 		log.Printf("[*] Fetching favicon: %s\n", favURL)
 	}
 
-	client := &http.Client{Timeout: 7 * time.Second}
-	req, err := http.NewRequest("GET", favURL, nil)
+	favCtx, cancel := context.WithTimeout(ctx, 7*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(favCtx, "GET", favURL, nil)
 	if err != nil {
 		return "N/A", 0, ""
 	}
@@ -488,6 +557,9 @@ func hashFavicon(pageURL string, verbose bool) (string, uint32, string) {
 			} else {
 				log.Printf("[!] favicon status: %d\n", resp.StatusCode)
 			}
+		}
+		if resp != nil && resp.Body != nil {
+			resp.Body.Close()
 		}
 		return "N/A", 0, ""
 	}
@@ -531,76 +603,77 @@ func uniqueStrings(input []string) []string {
 }
 
 func printHuman(info *TechStack) {
-	fmt.Println("📡 Scan Result for:", info.URL)
+	fmt.Printf("=== Scan Result for: %s\n", info.URL)
 	if info.URL != info.FinalURL && info.FinalURL != "" {
-		fmt.Println("   ↳ Final URL:", info.FinalURL)
+		fmt.Printf("    Final URL: %s\n", info.FinalURL)
 	}
-	fmt.Println(strings.Repeat("─", 60))
+	fmt.Println(strings.Repeat("-", 60))
 
-	fmt.Printf("🔒 TLS handshake OK: %v", info.TLSValid)
+	fmt.Printf("TLS handshake OK: %v", info.TLSValid)
 	if info.TLSIssuer != "" {
 		fmt.Printf(" (Issuer: %s)", info.TLSIssuer)
 	}
 	fmt.Println()
 
 	if len(info.Hosting) > 0 {
-		fmt.Println("🏢 Hosting / Infra Guess:", strings.Join(info.Hosting, ", "))
+		fmt.Println("Hosting / Infra Guess:", strings.Join(info.Hosting, ", "))
 	}
 	if len(info.CDN) > 0 {
-		fmt.Println("🌐 CDN / WAF Hints:", strings.Join(info.CDN, ", "))
+		fmt.Println("CDN / WAF Hints:", strings.Join(info.CDN, ", "))
 	}
 
 	if len(info.IPs) > 0 {
-		fmt.Println("📡 IPs:", strings.Join(info.IPs, ", "))
+		fmt.Println("IPs:", strings.Join(info.IPs, ", "))
 	}
 	if len(info.ReverseDNS) > 0 {
-		fmt.Println("🔎 rDNS:", strings.Join(info.ReverseDNS, ", "))
+		fmt.Println("rDNS:", strings.Join(info.ReverseDNS, ", "))
 	}
 	if info.CNAME != "" && !strings.EqualFold(info.CNAME, info.FinalURL) {
-		fmt.Println("🔗 CNAME:", info.CNAME)
+		fmt.Println("CNAME:", info.CNAME)
 	}
 
 	if len(info.Backend) > 0 {
-		fmt.Println("⚙️  Backend Detected:", strings.Join(info.Backend, ", "))
+		fmt.Println("Backend Detected:", strings.Join(info.Backend, ", "))
 	} else {
-		fmt.Println("⚙️  Backend Detected: (not detected)")
+		fmt.Println("Backend Detected: (not detected)")
 	}
 
 	if len(info.Frontend) > 0 {
-		fmt.Println("🎨 Frontend Detected:", strings.Join(info.Frontend, ", "))
+		fmt.Println("Frontend Detected:", strings.Join(info.Frontend, ", "))
 	} else {
-		fmt.Println("🎨 Frontend Detected: (not detected)")
+		fmt.Println("Frontend Detected: (not detected)")
 	}
 
 	if len(info.CMS) > 0 {
-		fmt.Println("📦 CMS / Platform:", strings.Join(info.CMS, ", "))
+		fmt.Println("CMS / Platform:", strings.Join(info.CMS, ", "))
 	} else {
-		fmt.Println("📦 CMS / Platform: (not detected)")
+		fmt.Println("CMS / Platform: (not detected)")
 	}
 
 	if len(info.Analytics) > 0 {
-		fmt.Println("📈 Analytics / Tags:", strings.Join(info.Analytics, ", "))
+		fmt.Println("Analytics / Tags:", strings.Join(info.Analytics, ", "))
 	} else {
-		fmt.Println("📈 Analytics / Tags: (not detected)")
+		fmt.Println("Analytics / Tags: (not detected)")
 	}
 
 	if len(info.Fingerprints) > 0 {
-		fmt.Println("🧬 Fingerprints:", strings.Join(info.Fingerprints, ", "))
+		fmt.Println("Fingerprints:", strings.Join(info.Fingerprints, ", "))
 	}
 
 	if info.FaviconSHA1 != "N/A" {
-		fmt.Printf("🖼️ Favicon SHA1: %s\n", info.FaviconSHA1)
-		fmt.Printf("   Favicon MMH3: %d\n", info.FaviconMMH3)
+		fmt.Printf("Favicon SHA1: %s\n", info.FaviconSHA1)
+		fmt.Printf("Favicon MMH3: %d\n", info.FaviconMMH3)
 	} else {
-		fmt.Println("🖼️ Favicon: not fetched")
+		fmt.Println("Favicon: not fetched")
 	}
 
 	if len(info.Other) > 0 {
-		fmt.Println("📚 Other Detected Categories:")
+		fmt.Println("Other Detected Categories:")
 		for cat, list := range info.Other {
 			fmt.Printf("  - %s: %s\n", cat, strings.Join(list, ", "))
 		}
 	}
 
-	fmt.Println(strings.Repeat("─", 60))
+	fmt.Println(strings.Repeat("-", 60))
 }
+
