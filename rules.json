@@ -9,7 +9,8 @@
         { "source": "html", "type": "contains", "value": "wp-content" },
         { "source": "html", "type": "contains", "value": "wp-includes" },
         { "source": "html", "type": "contains", "value": "wp-json" },
-        { "source": "html", "type": "contains", "value": "content=\\\"wordpress" }
+        { "source": "html", "type": "contains", "value": "content=\\\"wordpress" },
+        { "source": "probe_status", "type": "equals", "value": "/wp-json/:200" }
       ]
     },
     {
@@ -29,16 +30,18 @@
       "threshold": 1,
       "signals": [
         { "source": "html", "type": "contains", "value": "drupal.settings" },
-        { "source": "html", "type": "contains", "value": "drupal.js" }
+        { "source": "html", "type": "contains", "value": "drupal.js" },
+        { "source": "probe_status", "type": "equals", "value": "/user/login:200" }
       ]
     },
     {
       "id": "joomla",
-      "name": "Joomla",
-      "category": "cms",
-      "threshold": 1,
-      "signals": [
-        { "source": "html", "type": "contains", "value": "content=\\\"joomla!" }
+  "name": "Joomla",
+  "category": "cms",
+  "threshold": 1,
+  "signals": [
+        { "source": "html", "type": "contains", "value": "content=\\\"joomla!" },
+        { "source": "probe_status", "type": "equals", "value": "/administrator/:200" }
       ]
     },
     {
@@ -88,7 +91,31 @@
       "category": "frontend",
       "threshold": 1,
       "signals": [
-        { "source": "script_src", "type": "contains", "value": "vue" }
+        {
+          "source": "script_src",
+          "type": "contains",
+          "value": "cdn.jsdelivr.net/npm/vue"
+        },
+        {
+          "source": "script_src",
+          "type": "contains",
+          "value": "unpkg.com/vue@"
+        },
+        {
+          "source": "script_src",
+          "type": "contains",
+          "value": "vue.global.js"
+        },
+        {
+          "source": "script_src",
+          "type": "contains",
+          "value": "vue.runtime."
+        },
+        {
+          "source": "script_src",
+          "type": "contains",
+          "value": "vue.min.js"
+        }
       ]
     },
     {
@@ -301,10 +328,21 @@
       "id": "express",
       "name": "Express (Node.js)",
       "category": "backend",
-      "threshold": 1,
+      "threshold": 2,
       "signals": [
-        { "source": "header", "key": "X-Powered-By", "type": "contains", "value": "express" },
-        { "source": "header_key", "type": "contains", "value": "x-powered-by" }
+        {
+          "source": "header",
+          "key": "X-Powered-By",
+          "type": "contains",
+          "value": "express",
+          "weight": 2
+        },
+        {
+          "source": "probe_body",
+          "type": "contains",
+          "value": "cannot get /",
+          "weight": 1
+        }
       ]
     },
     {
@@ -464,54 +502,96 @@
       ]
     },
     {
-      "id": "svelte",
-      "name": "Svelte",
-      "category": "frontend",
+      "id": "error_django",
+      "name": "Django Debug / Traceback",
+      "category": "backend",
       "threshold": 1,
       "signals": [
-        { "source": "html", "type": "contains", "value": "data-svelte-h" },
-        { "source": "script_src", "type": "contains", "value": "svelte" }
+        { "source": "probe_body", "type": "contains", "value": "traceback (most recent call last)" },
+        { "source": "probe_body", "type": "contains", "value": "django" }
       ]
     },
     {
-      "id": "nuxt",
-      "name": "Nuxt.js",
-      "category": "frontend",
+      "id": "error_laravel",
+      "name": "Laravel / PHP (Illuminate)",
+      "category": "backend",
       "threshold": 1,
       "signals": [
-        { "source": "html", "type": "contains", "value": "window.__NUXT__" },
-        { "source": "script_src", "type": "contains", "value": "_nuxt" }
+        { "source": "probe_body", "type": "contains", "value": "illuminate\\\\" },
+        { "source": "probe_body", "type": "contains", "value": "laravel" }
       ]
     },
     {
-      "id": "astro",
-      "name": "Astro",
-      "category": "frontend",
+      "id": "error_spring",
+      "name": "Spring Boot (Whitelabel Error)",
+      "category": "backend",
       "threshold": 1,
       "signals": [
-        { "source": "html", "type": "contains", "value": "data-astro-cid" },
-        { "source": "html", "type": "contains", "value": "astro-island" }
+        { "source": "probe_body", "type": "contains", "value": "whitelabel error page" },
+        { "source": "probe_body", "type": "contains", "value": "there was an unexpected error" },
+        { "source": "probe_body", "type": "contains", "value": "org.springframework" }
       ]
     },
     {
-      "id": "woocommerce",
-      "name": "WooCommerce",
-      "category": "cms",
-      "threshold": 1,
+      "id": "error_php_generic",
+      "name": "PHP Error Page",
+      "category": "backend",
+      "threshold": 2,
       "signals": [
-        { "source": "html", "type": "contains", "value": "woocommerce" },
-        { "source": "script_src", "type": "contains", "value": "wc-cart-fragments" }
+        { "source": "probe_body", "type": "contains", "value": "fatal error:" },
+        { "source": "probe_body", "type": "contains", "value": "in /" },
+        { "source": "probe_body", "type": "contains", "value": "on line" }
       ]
     },
     {
-      "id": "magento",
-      "name": "Magento",
-      "category": "cms",
+      "id": "microsoft_clarity",
+      "name": "Microsoft Clarity",
+      "category": "analytics",
       "threshold": 1,
       "signals": [
-        { "source": "html", "type": "contains", "value": "Mage.Cookies" },
-        { "source": "html", "type": "contains", "value": "Magento" }
+        {
+          "source": "html",
+          "type": "contains",
+          "value": "https://www.clarity.ms/tag/"
+        },
+        {
+          "source": "html",
+          "type": "contains",
+          "value": "clarity(\""
+        }
+      ]
+    },
+    {
+      "id": "poptin",
+      "name": "Poptin",
+      "category": "analytics",
+      "threshold": 1,
+      "signals": [
+        {
+          "source": "html",
+          "type": "contains",
+          "value": "pixel-script-poptin"
+        },
+        {
+          "source": "html",
+          "type": "contains",
+          "value": "https://cdn.popt.in/pixel.js"
+        }
+      ]
+    },
+    {
+      "id": "hosting_tyco",
+      "name": "Tyco / OMC (IL ISP/DC)",
+      "category": "hosting",
+      "threshold": 1,
+      "signals": [
+        {
+          "source": "dns_rdns",
+          "type": "contains",
+          "value": "tyco.co.il"
+        }
       ]
     }
   ]
+}
 }
