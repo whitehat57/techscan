@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -87,6 +88,37 @@ type RulesFile struct {
 	Technologies []TechRule `json:"technologies"`
 }
 
+// ===== Cloudflare Radar URL Scanner structs =====
+
+type radarSubmitResult struct {
+	UUID       string `json:"uuid"`
+	URL        string `json:"url"`
+	Visibility string `json:"visibility"`
+}
+
+type radarScanResult struct {
+	Meta struct {
+		Processors struct {
+			Wappa struct {
+				Data []struct {
+					App        string `json:"app"`
+					Categories []struct {
+						Name string `json:"name"`
+					} `json:"categories"`
+				} `json:"data"`
+			} `json:"wappa"`
+		} `json:"processors"`
+	} `json:"meta"`
+}
+
+// wrapper standar Cloudflare v4
+type cfResponse[T any] struct {
+	Success  bool  `json:"success"`
+	Errors   []any `json:"errors"`
+	Messages []any `json:"messages"`
+	Result   T     `json:"result"`
+}
+
 // ===== Flags =====
 
 func main() {
@@ -95,12 +127,14 @@ func main() {
 		asJSON    bool
 		rulesPath string
 		deepMode  bool
+		useRadar  bool
 	)
 
 	flag.BoolVar(&verbose, "v", false, "verbose mode (debug logs to stderr)")
 	flag.BoolVar(&asJSON, "json", false, "output JSON instead of human-readable text")
 	flag.StringVar(&rulesPath, "rules", "rules.json", "path to rules JSON file")
 	flag.BoolVar(&deepMode, "deep", false, "enable deep probing (extra paths & error page)")
+	flag.BoolVar(&useRadar, "radar", false, "use Cloudflare Radar URL Scanner (CF_RADAR_ACCOUNT_ID and CF_API_TOKEN env vars)")
 	flag.Parse()
 
 	if flag.NArg() < 1 {
@@ -124,7 +158,7 @@ func main() {
 		log.Printf("[*] Scanning target: %s (deep=%v)\n", target, deepMode)
 	}
 
-	info, err := scan(target, verbose, deepMode, rules)
+	info, err := scan(target, verbose, deepMode, useRadar, rules)
 	if err != nil {
 		log.Fatalf("scan failed: %v\n", err)
 	}
@@ -171,12 +205,8 @@ func loadRules(path string) (*RulesFile, error) {
 
 func applyRules(env *ScanEnv, rules *RulesFile) map[string][]string {
 	scores := make(map[string]int)
-	categories := make(map[string]string)
-	names := make(map[string]string)
 
 	for _, tech := range rules.Technologies {
-		categories[tech.ID] = tech.Category
-		names[tech.ID] = tech.Name
 		for _, sig := range tech.Signals {
 			if matchSignal(env, sig) {
 				scores[tech.ID] += max(sig.Weight, 1)
@@ -186,9 +216,8 @@ func applyRules(env *ScanEnv, rules *RulesFile) map[string][]string {
 
 	result := make(map[string][]string)
 	for _, tech := range rules.Technologies {
-		if scores[tech.ID] >= tech.Threshold {
-			cat := tech.Category
-			result[cat] = append(result[cat], tech.Name)
+		if scores[tech.ID] >= max(tech.Threshold, 1) {
+			result[tech.Category] = append(result[tech.Category], tech.Name)
 		}
 	}
 
@@ -297,7 +326,7 @@ func max(a, b int) int {
 
 // ===== Scanner Core =====
 
-func scan(rawURL string, verbose bool, deepMode bool, rules *RulesFile) (*TechStack, error) {
+func scan(rawURL string, verbose bool, deepMode bool, useRadar bool, rules *RulesFile) (*TechStack, error) {
 	normalized := normalizeURL(rawURL)
 	if verbose {
 		log.Printf("[*] Normalized URL: %s\n", normalized)
@@ -339,7 +368,7 @@ func scan(rawURL string, verbose bool, deepMode bool, rules *RulesFile) (*TechSt
 		log.Printf("[*] TLS: valid=%v issuer=%s\n", tlsValid, tlsIssuer)
 	}
 
-	favSHA, favMMH, _ := hashFavicon(finalURL, verbose)
+	favSHA, favMMH := hashFavicon(finalURL, verbose)
 
 	var probes []ProbeResult
 	if deepMode {
@@ -360,6 +389,24 @@ func scan(rawURL string, verbose bool, deepMode bool, rules *RulesFile) (*TechSt
 
 	detected := applyRules(env, rules)
 
+	radarCats := make(map[string][]string)
+	if useRadar {
+		if verbose {
+			log.Printf("[*] Radar: enabled, sending URL to Cloudflare URL Scanner\n")
+		}
+		radarRes, rawRadar, radarUUID, err := radarScan(finalURL, verbose)
+		if err != nil {
+			if verbose {
+				log.Printf("[!] Radar scan failed: %v\n", err)
+			}
+		} else {
+			radarCats = mapRadarWappaToCats(radarRes)
+			if err := saveRadarJSON(finalURL, radarUUID, rawRadar, verbose); err != nil && verbose {
+				log.Printf("[!] failed to save Radar JSON: %v\n", err)
+			}
+		}
+	}
+
 	ts := &TechStack{
 		URL:          rawURL,
 		FinalURL:     finalURL,
@@ -371,13 +418,13 @@ func scan(rawURL string, verbose bool, deepMode bool, rules *RulesFile) (*TechSt
 		ReverseDNS:   reverse,
 		FaviconSHA1:  favSHA,
 		FaviconMMH3:  favMMH,
-		CMS:          detected["cms"],
-		Frontend:     detected["frontend"],
-		Backend:      detected["backend"],
-		Analytics:    detected["analytics"],
-		CDN:          detected["cdn"],
-		Hosting:      detected["hosting"],
-		Fingerprints: detected["fingerprint"],
+		CMS:          mergeAndUnique(detected["cms"], radarCats["cms"]),
+		Frontend:     mergeAndUnique(detected["frontend"], radarCats["frontend"]),
+		Backend:      mergeAndUnique(detected["backend"], radarCats["backend"]),
+		Analytics:    mergeAndUnique(detected["analytics"], radarCats["analytics"]),
+		CDN:          mergeAndUnique(detected["cdn"], radarCats["cdn"]),
+		Hosting:      mergeAndUnique(detected["hosting"], radarCats["hosting"]),
+		Fingerprints: mergeAndUnique(detected["fingerprint"], radarCats["fingerprint"]),
 	}
 
 	other := make(map[string][]string)
@@ -388,6 +435,14 @@ func scan(rawURL string, verbose bool, deepMode bool, rules *RulesFile) (*TechSt
 			other[cat] = list
 		}
 	}
+
+	if len(radarCats["radar_other"]) > 0 {
+		other["radar_other"] = mergeAndUnique(other["radar_other"], radarCats["radar_other"])
+	}
+	if len(radarCats["radar_all"]) > 0 {
+		other["radar_all"] = mergeAndUnique(other["radar_all"], radarCats["radar_all"])
+	}
+
 	if len(other) > 0 {
 		ts.Other = other
 	}
@@ -489,13 +544,13 @@ func checkTLS(host string) (bool, string) {
 	return true, ""
 }
 
-func hashFavicon(pageURL string, verbose bool) (string, uint32, string) {
+func hashFavicon(pageURL string, verbose bool) (string, uint32) {
 	u, err := url.Parse(pageURL)
 	if err != nil || u.Scheme == "" || u.Host == "" {
 		if verbose {
 			log.Printf("[!] cannot parse URL for favicon: %s (%v)\n", pageURL, err)
 		}
-		return "N/A", 0, ""
+		return "N/A", 0
 	}
 
 	base := u.Scheme + "://" + u.Host
@@ -508,7 +563,7 @@ func hashFavicon(pageURL string, verbose bool) (string, uint32, string) {
 	client := &http.Client{Timeout: 7 * time.Second}
 	req, err := http.NewRequest("GET", favURL, nil)
 	if err != nil {
-		return "N/A", 0, ""
+		return "N/A", 0
 	}
 	req.Header.Set("User-Agent", defaultUA)
 
@@ -521,7 +576,7 @@ func hashFavicon(pageURL string, verbose bool) (string, uint32, string) {
 				log.Printf("[!] favicon status: %d\n", resp.StatusCode)
 			}
 		}
-		return "N/A", 0, ""
+		return "N/A", 0
 	}
 	defer resp.Body.Close()
 
@@ -530,7 +585,7 @@ func hashFavicon(pageURL string, verbose bool) (string, uint32, string) {
 		if verbose {
 			log.Printf("[!] favicon read error or empty body\n")
 		}
-		return "N/A", 0, ""
+		return "N/A", 0
 	}
 
 	sha := sha1.Sum(data)
@@ -541,7 +596,7 @@ func hashFavicon(pageURL string, verbose bool) (string, uint32, string) {
 		log.Printf("[*] favicon sha1=%s mmh3=%d\n", shaStr, mmh)
 	}
 
-	return shaStr, mmh, ""
+	return shaStr, mmh
 }
 
 // Deep probing: path signatures + 404/error page
@@ -616,7 +671,245 @@ func probePaths(finalURL string, verbose bool) []ProbeResult {
 	return probes
 }
 
+// radarScan akan:
+// 1) baca env CF_RADAR_ACCOUNT_ID dan CF_API_TOKEN
+// 2) submit URL ke Cloudflare URL Scanner
+// 3) poll result sampai siap (atau timeout)
+// 4) return hasil parsable (radarScanResult) + raw JSON result + uuid
+func radarScan(targetURL string, verbose bool) (*radarScanResult, []byte, string, error) {
+	accountID := os.Getenv("CF_RADAR_ACCOUNT_ID")
+	apiToken := os.Getenv("CF_API_TOKEN")
+	if accountID == "" || apiToken == "" {
+		return nil, nil, "", fmt.Errorf("CF_RADAR_ACCOUNT_ID / CF_API_TOKEN not set")
+	}
+
+	client := &http.Client{Timeout: 60 * time.Second}
+
+	submitUUID, err := radarSubmit(client, accountID, apiToken, targetURL, verbose)
+	if err != nil {
+		return nil, nil, "", err
+	}
+
+	if verbose {
+		log.Printf("[*] Radar: submitted scan uuid=%s\n", submitUUID)
+	}
+
+	rawResult, err := radarPollResult(client, accountID, apiToken, submitUUID, 10*time.Second, 120*time.Second, verbose)
+	if err != nil {
+		return nil, nil, submitUUID, err
+	}
+
+	var wrapper cfResponse[json.RawMessage]
+	if err := json.Unmarshal(rawResult, &wrapper); err != nil {
+		return nil, rawResult, submitUUID, fmt.Errorf("radar result unmarshal wrapper: %w", err)
+	}
+	if !wrapper.Success {
+		return nil, rawResult, submitUUID, fmt.Errorf("radar result success=false")
+	}
+
+	var r radarScanResult
+	if err := json.Unmarshal(wrapper.Result, &r); err != nil {
+		return nil, rawResult, submitUUID, fmt.Errorf("radar result unmarshal body: %w", err)
+	}
+
+	return &r, wrapper.Result, submitUUID, nil
+}
+
+func radarSubmit(client *http.Client, accountID, token, urlStr string, verbose bool) (string, error) {
+	reqBody := map[string]any{
+		"url":        urlStr,
+		"visibility": "Unlisted",
+	}
+	payload, err := json.Marshal(reqBody)
+	if err != nil {
+		return "", fmt.Errorf("radar submit marshal: %w", err)
+	}
+
+	endpoint := fmt.Sprintf("https://api.cloudflare.com/client/v4/accounts/%s/urlscanner/v2/scan", accountID)
+	req, err := http.NewRequest("POST", endpoint, bytes.NewReader(payload))
+	if err != nil {
+		return "", fmt.Errorf("radar submit build: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("radar submit do: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("radar submit read: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("radar submit status %d: %s", resp.StatusCode, string(body))
+	}
+
+	var wrapper cfResponse[radarSubmitResult]
+	if err := json.Unmarshal(body, &wrapper); err != nil {
+		return "", fmt.Errorf("radar submit unmarshal: %w", err)
+	}
+	if !wrapper.Success {
+		return "", fmt.Errorf("radar submit success=false")
+	}
+
+	return wrapper.Result.UUID, nil
+}
+
+func radarPollResult(client *http.Client, accountID, token, uuid string, interval, maxWait time.Duration, verbose bool) ([]byte, error) {
+	endpoint := fmt.Sprintf("https://api.cloudflare.com/client/v4/accounts/%s/urlscanner/v2/result/%s", accountID, uuid)
+	deadline := time.Now().Add(maxWait)
+
+	for {
+		if time.Now().After(deadline) {
+			return nil, fmt.Errorf("radar poll timeout (uuid=%s)", uuid)
+		}
+
+		req, err := http.NewRequest("GET", endpoint, nil)
+		if err != nil {
+			return nil, fmt.Errorf("radar poll build: %w", err)
+		}
+		req.Header.Set("Authorization", "Bearer "+token)
+
+		resp, err := client.Do(req)
+		if err != nil {
+			return nil, fmt.Errorf("radar poll do: %w", err)
+		}
+		body, err := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			return nil, fmt.Errorf("radar poll read: %w", err)
+		}
+
+		if resp.StatusCode == http.StatusNotFound {
+			if verbose {
+				log.Printf("[*] Radar: result not ready yet (404), waiting %s...\n", interval)
+			}
+			time.Sleep(interval)
+			continue
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("radar poll status %d: %s", resp.StatusCode, string(body))
+		}
+
+		return body, nil
+	}
+}
+
+func saveRadarJSON(finalURL, uuid string, raw []byte, verbose bool) error {
+	u, err := url.Parse(finalURL)
+	host := "scan"
+	if err == nil && u.Hostname() != "" {
+		host = u.Hostname()
+	}
+
+	dir := "cloudflare"
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return err
+	}
+
+	ts := time.Now().Format("20060102_150405")
+	safeHost := sanitizeFileName(host)
+	filename := fmt.Sprintf("%s_%s_%s.json", safeHost, uuid, ts)
+	path := filepath.Join(dir, filename)
+
+	if verbose {
+		log.Printf("[*] Radar: saving result to %s\n", path)
+	}
+
+	return os.WriteFile(path, raw, 0o644)
+}
+
+func sanitizeFileName(s string) string {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return "scan"
+	}
+	var b strings.Builder
+	for _, r := range s {
+		if (r >= 'a' && r <= 'z') ||
+			(r >= 'A' && r <= 'Z') ||
+			(r >= '0' && r <= '9') ||
+			r == '.' || r == '-' || r == '_' {
+			b.WriteRune(r)
+		} else {
+			b.WriteRune('_')
+		}
+	}
+	return b.String()
+}
+
 // ===== Utils =====
+
+func mergeAndUnique(a, b []string) []string {
+	merged := append(append([]string(nil), a...), b...)
+	return uniqueStrings(merged)
+}
+
+func mapRadarWappaToCats(res *radarScanResult) map[string][]string {
+	out := make(map[string][]string)
+	if res == nil {
+		return out
+	}
+
+	for _, item := range res.Meta.Processors.Wappa.Data {
+		app := strings.TrimSpace(item.App)
+		if app == "" {
+			continue
+		}
+
+		out["radar_all"] = append(out["radar_all"], app)
+
+		if len(item.Categories) == 0 {
+			out["radar_other"] = append(out["radar_other"], app)
+			continue
+		}
+
+		matched := false
+		for _, cat := range item.Categories {
+			name := strings.ToLower(strings.TrimSpace(cat.Name))
+			switch {
+			case strings.Contains(name, "cdn"):
+				out["cdn"] = append(out["cdn"], app)
+				matched = true
+			case strings.Contains(name, "analytics"), strings.Contains(name, "tag manager"), strings.Contains(name, "marketing"):
+				out["analytics"] = append(out["analytics"], app)
+				matched = true
+			case strings.Contains(name, "cms"):
+				out["cms"] = append(out["cms"], app)
+				matched = true
+			case strings.Contains(name, "hosting"), strings.Contains(name, "cloud"), strings.Contains(name, "paas"), strings.Contains(name, "iaas"):
+				out["hosting"] = append(out["hosting"], app)
+				matched = true
+			case strings.Contains(name, "javascript"), strings.Contains(name, "frontend"), strings.Contains(name, "framework"), strings.Contains(name, "library"):
+				out["frontend"] = append(out["frontend"], app)
+				matched = true
+			case strings.Contains(name, "backend"), strings.Contains(name, "server"), strings.Contains(name, "programming"):
+				out["backend"] = append(out["backend"], app)
+				matched = true
+			case strings.Contains(name, "waf"):
+				out["cdn"] = append(out["cdn"], app)
+				matched = true
+			default:
+				// fallback to radar_other later if nothing matched
+			}
+		}
+
+		if !matched {
+			out["radar_other"] = append(out["radar_other"], app)
+		}
+	}
+
+	for k, v := range out {
+		out[k] = uniqueStrings(v)
+	}
+
+	return out
+}
 
 func uniqueStrings(input []string) []string {
 	set := make(map[string]struct{})
@@ -635,76 +928,76 @@ func uniqueStrings(input []string) []string {
 }
 
 func printHuman(info *TechStack) {
-	fmt.Println("📡 Scan Result for:", info.URL)
+	fmt.Println("=== Scan Result for:", info.URL)
 	if info.URL != info.FinalURL && info.FinalURL != "" {
-		fmt.Println("   ↳ Final URL:", info.FinalURL)
+		fmt.Println("    Final URL:", info.FinalURL)
 	}
-	fmt.Println(strings.Repeat("─", 60))
+	fmt.Println(strings.Repeat("=", 60))
 
-	fmt.Printf("🔒 TLS handshake OK: %v", info.TLSValid)
+	fmt.Printf("TLS handshake OK: %v", info.TLSValid)
 	if info.TLSIssuer != "" {
 		fmt.Printf(" (Issuer: %s)", info.TLSIssuer)
 	}
 	fmt.Println()
 
 	if len(info.Hosting) > 0 {
-		fmt.Println("🏢 Hosting / Infra Guess:", strings.Join(info.Hosting, ", "))
+		fmt.Println("Hosting / Infra Guess:", strings.Join(info.Hosting, ", "))
 	}
 	if len(info.CDN) > 0 {
-		fmt.Println("🌐 CDN / WAF Hints:", strings.Join(info.CDN, ", "))
+		fmt.Println("CDN / WAF Hints:", strings.Join(info.CDN, ", "))
 	}
 
 	if len(info.IPs) > 0 {
-		fmt.Println("📡 IPs:", strings.Join(info.IPs, ", "))
+		fmt.Println("IPs:", strings.Join(info.IPs, ", "))
 	}
 	if len(info.ReverseDNS) > 0 {
-		fmt.Println("🔎 rDNS:", strings.Join(info.ReverseDNS, ", "))
+		fmt.Println("rDNS:", strings.Join(info.ReverseDNS, ", "))
 	}
 	if info.CNAME != "" && !strings.EqualFold(info.CNAME, info.FinalURL) {
-		fmt.Println("🔗 CNAME:", info.CNAME)
+		fmt.Println("CNAME:", info.CNAME)
 	}
 
 	if len(info.Backend) > 0 {
-		fmt.Println("⚙️  Backend Detected:", strings.Join(info.Backend, ", "))
+		fmt.Println("Backend Detected:", strings.Join(info.Backend, ", "))
 	} else {
-		fmt.Println("⚙️  Backend Detected: (not detected)")
+		fmt.Println("Backend Detected: (not detected)")
 	}
 
 	if len(info.Frontend) > 0 {
-		fmt.Println("🎨 Frontend Detected:", strings.Join(info.Frontend, ", "))
+		fmt.Println("Frontend Detected:", strings.Join(info.Frontend, ", "))
 	} else {
-		fmt.Println("🎨 Frontend Detected: (not detected)")
+		fmt.Println("Frontend Detected: (not detected)")
 	}
 
 	if len(info.CMS) > 0 {
-		fmt.Println("📦 CMS / Platform:", strings.Join(info.CMS, ", "))
+		fmt.Println("CMS / Platform:", strings.Join(info.CMS, ", "))
 	} else {
-		fmt.Println("📦 CMS / Platform: (not detected)")
+		fmt.Println("CMS / Platform: (not detected)")
 	}
 
 	if len(info.Analytics) > 0 {
-		fmt.Println("📈 Analytics / Tags:", strings.Join(info.Analytics, ", "))
+		fmt.Println("Analytics / Tags:", strings.Join(info.Analytics, ", "))
 	} else {
-		fmt.Println("📈 Analytics / Tags: (not detected)")
+		fmt.Println("Analytics / Tags: (not detected)")
 	}
 
 	if len(info.Fingerprints) > 0 {
-		fmt.Println("🧬 Fingerprints:", strings.Join(info.Fingerprints, ", "))
+		fmt.Println("Fingerprints:", strings.Join(info.Fingerprints, ", "))
 	}
 
 	if info.FaviconSHA1 != "N/A" {
-		fmt.Printf("🖼️ Favicon SHA1: %s\n", info.FaviconSHA1)
-		fmt.Printf("   Favicon MMH3: %d\n", info.FaviconMMH3)
+		fmt.Printf("Favicon SHA1: %s\n", info.FaviconSHA1)
+		fmt.Printf("Favicon MMH3: %d\n", info.FaviconMMH3)
 	} else {
-		fmt.Println("🖼️ Favicon: not fetched")
+		fmt.Println("Favicon: not fetched")
 	}
 
 	if len(info.Other) > 0 {
-		fmt.Println("📚 Other Detected Categories:")
+		fmt.Println("Other Detected Categories:")
 		for cat, list := range info.Other {
 			fmt.Printf("  - %s: %s\n", cat, strings.Join(list, ", "))
 		}
 	}
 
-	fmt.Println(strings.Repeat("─", 60))
+	fmt.Println(strings.Repeat("=", 60))
 }
