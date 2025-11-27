@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/md5"
 	"crypto/sha1"
 	"crypto/tls"
 	"encoding/hex"
@@ -37,6 +38,7 @@ type TechStack struct {
 	CNAME       string            `json:"cname"`
 	ReverseDNS  []string          `json:"reverse_dns"`
 	FaviconSHA1 string            `json:"favicon_sha1"`
+	FaviconMD5  string            `json:"favicon_md5"`
 	FaviconMMH3 uint32            `json:"favicon_mmh3"`
 
 	CMS          []string            `json:"cms"`
@@ -139,7 +141,7 @@ func main() {
 
 	if flag.NArg() < 1 {
 		fmt.Println("Usage:")
-		fmt.Println("  stackscanner_rules [-v] [-json] [--deep] [-rules rules.json] <url>")
+		fmt.Println("  stackscannerv2 [-v] [-json] [--deep] [-rules rules.json] [--radar] <url>")
 		os.Exit(1)
 	}
 
@@ -342,6 +344,7 @@ func scan(rawURL string, verbose bool, deepMode bool, useRadar bool, rules *Rule
 	host := resp.Request.URL.Hostname()
 	if verbose {
 		log.Printf("[*] Final URL after redirects: %s (host: %s)\n", finalURL, host)
+		log.Printf("[*] HTTP status: %d\n", resp.StatusCode)
 	}
 
 	headers := extractHeaders(resp)
@@ -368,7 +371,7 @@ func scan(rawURL string, verbose bool, deepMode bool, useRadar bool, rules *Rule
 		log.Printf("[*] TLS: valid=%v issuer=%s\n", tlsValid, tlsIssuer)
 	}
 
-	favSHA, favMMH := hashFavicon(finalURL, verbose)
+	favSHA, favMMH, favMD5 := hashFavicon(finalURL, verbose)
 
 	var probes []ProbeResult
 	if deepMode {
@@ -396,9 +399,8 @@ func scan(rawURL string, verbose bool, deepMode bool, useRadar bool, rules *Rule
 		}
 		radarRes, rawRadar, radarUUID, err := radarScan(finalURL, verbose)
 		if err != nil {
-			if verbose {
-				log.Printf("[!] Radar scan failed: %v\n", err)
-			}
+			msg := fmt.Sprintf("radar scan skipped: %v", err)
+			log.Printf("[!] %s\n", msg)
 		} else {
 			radarCats = mapRadarWappaToCats(radarRes)
 			if err := saveRadarJSON(finalURL, radarUUID, rawRadar, verbose); err != nil && verbose {
@@ -425,6 +427,7 @@ func scan(rawURL string, verbose bool, deepMode bool, useRadar bool, rules *Rule
 		CDN:          mergeAndUnique(detected["cdn"], radarCats["cdn"]),
 		Hosting:      mergeAndUnique(detected["hosting"], radarCats["hosting"]),
 		Fingerprints: mergeAndUnique(detected["fingerprint"], radarCats["fingerprint"]),
+		FaviconMD5:   favMD5,
 	}
 
 	other := make(map[string][]string)
@@ -544,13 +547,13 @@ func checkTLS(host string) (bool, string) {
 	return true, ""
 }
 
-func hashFavicon(pageURL string, verbose bool) (string, uint32) {
+func hashFavicon(pageURL string, verbose bool) (string, uint32, string) {
 	u, err := url.Parse(pageURL)
 	if err != nil || u.Scheme == "" || u.Host == "" {
 		if verbose {
 			log.Printf("[!] cannot parse URL for favicon: %s (%v)\n", pageURL, err)
 		}
-		return "N/A", 0
+		return "N/A", 0, "N/A"
 	}
 
 	base := u.Scheme + "://" + u.Host
@@ -563,7 +566,7 @@ func hashFavicon(pageURL string, verbose bool) (string, uint32) {
 	client := &http.Client{Timeout: 7 * time.Second}
 	req, err := http.NewRequest("GET", favURL, nil)
 	if err != nil {
-		return "N/A", 0
+		return "N/A", 0, "N/A"
 	}
 	req.Header.Set("User-Agent", defaultUA)
 
@@ -576,7 +579,7 @@ func hashFavicon(pageURL string, verbose bool) (string, uint32) {
 				log.Printf("[!] favicon status: %d\n", resp.StatusCode)
 			}
 		}
-		return "N/A", 0
+		return "N/A", 0, "N/A"
 	}
 	defer resp.Body.Close()
 
@@ -585,18 +588,20 @@ func hashFavicon(pageURL string, verbose bool) (string, uint32) {
 		if verbose {
 			log.Printf("[!] favicon read error or empty body\n")
 		}
-		return "N/A", 0
+		return "N/A", 0, "N/A"
 	}
 
 	sha := sha1.Sum(data)
+	md := md5.Sum(data)
 	shaStr := hex.EncodeToString(sha[:])
+	md5Str := hex.EncodeToString(md[:])
 	mmh := murmur3.Sum32(data)
 
 	if verbose {
-		log.Printf("[*] favicon sha1=%s mmh3=%d\n", shaStr, mmh)
+		log.Printf("[*] favicon sha1=%s md5=%s mmh3=%d\n", shaStr, md5Str, mmh)
 	}
 
-	return shaStr, mmh
+	return shaStr, mmh, md5Str
 }
 
 // Deep probing: path signatures + 404/error page
@@ -712,7 +717,7 @@ func radarScan(targetURL string, verbose bool) (*radarScanResult, []byte, string
 		return nil, rawResult, submitUUID, fmt.Errorf("radar result unmarshal body: %w", err)
 	}
 
-	return &r, wrapper.Result, submitUUID, nil
+	return &r, []byte(wrapper.Result), submitUUID, nil
 }
 
 func radarSubmit(client *http.Client, accountID, token, urlStr string, verbose bool) (string, error) {
@@ -885,10 +890,10 @@ func mapRadarWappaToCats(res *radarScanResult) map[string][]string {
 			case strings.Contains(name, "hosting"), strings.Contains(name, "cloud"), strings.Contains(name, "paas"), strings.Contains(name, "iaas"):
 				out["hosting"] = append(out["hosting"], app)
 				matched = true
-			case strings.Contains(name, "javascript"), strings.Contains(name, "frontend"), strings.Contains(name, "framework"), strings.Contains(name, "library"):
+			case strings.Contains(name, "javascript"), strings.Contains(name, "front-end"), strings.Contains(name, "frontend"), strings.Contains(name, "ui"), strings.Contains(name, "library"):
 				out["frontend"] = append(out["frontend"], app)
 				matched = true
-			case strings.Contains(name, "backend"), strings.Contains(name, "server"), strings.Contains(name, "programming"):
+			case strings.Contains(name, "framework"), strings.Contains(name, "server"), strings.Contains(name, "backend"), strings.Contains(name, "programming"), strings.Contains(name, "mvc"):
 				out["backend"] = append(out["backend"], app)
 				matched = true
 			case strings.Contains(name, "waf"):
@@ -953,7 +958,11 @@ func printHuman(info *TechStack) {
 	if len(info.ReverseDNS) > 0 {
 		fmt.Println("rDNS:", strings.Join(info.ReverseDNS, ", "))
 	}
-	if info.CNAME != "" && !strings.EqualFold(info.CNAME, info.FinalURL) {
+	finalHost := ""
+	if u, err := url.Parse(info.FinalURL); err == nil {
+		finalHost = u.Hostname()
+	}
+	if info.CNAME != "" && (finalHost == "" || !strings.EqualFold(info.CNAME, finalHost)) {
 		fmt.Println("CNAME:", info.CNAME)
 	}
 
@@ -987,6 +996,7 @@ func printHuman(info *TechStack) {
 
 	if info.FaviconSHA1 != "N/A" {
 		fmt.Printf("Favicon SHA1: %s\n", info.FaviconSHA1)
+		fmt.Printf("Favicon MD5: %s\n", info.FaviconMD5)
 		fmt.Printf("Favicon MMH3: %d\n", info.FaviconMMH3)
 	} else {
 		fmt.Println("Favicon: not fetched")
