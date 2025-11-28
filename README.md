@@ -154,4 +154,4 @@ CF_RADAR_ACCOUNT_ID=xxx CF_API_TOKEN=yyy ./bin/stackscanner --radar example.com
 - Perbaikan rule, tambahan fitur, dan laporan bug sangat disambut. Silakan fork dan buka PR.
 
 **License**
-- Lihat `LICENSE` di repository untuk detail lisensi.
+- Proprietary – All rights reserved. Lihat `LICENSE` untuk ketentuan lengkap.
