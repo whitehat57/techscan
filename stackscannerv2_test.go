@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -181,4 +182,43 @@ func TestSharedClientReuse(t *testing.T) {
 	}
 	resp2.Body.Close()
 	cancel2()
+}
+
+// TestCheckRedirect verifying safe redirect handling logic
+func TestCheckRedirect(t *testing.T) {
+	// Recreating the closure from main() for testing purposes
+	checkRedirect := func(req *http.Request, via []*http.Request) error {
+		if len(via) >= 10 {
+			return errors.New("stopped after 10 redirects")
+		}
+		if req.URL.Scheme != "http" && req.URL.Scheme != "https" {
+			return fmt.Errorf("redirect to unsafe scheme: %s", req.URL.Scheme)
+		}
+		return nil
+	}
+
+	// Case 1: Too many redirects
+	req, _ := http.NewRequest("GET", "http://example.com", nil)
+	var via []*http.Request
+	for i := 0; i < 10; i++ {
+		via = append(via, req)
+	}
+	err := checkRedirect(req, via)
+	if err == nil || err.Error() != "stopped after 10 redirects" {
+		t.Errorf("expected error 'stopped after 10 redirects', got %v", err)
+	}
+
+	// Case 2: Unsafe scheme
+	reqUnsafe, _ := http.NewRequest("GET", "file:///etc/passwd", nil)
+	err = checkRedirect(reqUnsafe, nil)
+	if err == nil || err.Error() != "redirect to unsafe scheme: file" {
+		t.Errorf("expected error 'redirect to unsafe scheme: file', got %v", err)
+	}
+
+	// Case 3: Safe
+	reqSafe, _ := http.NewRequest("GET", "https://example.com/login", nil)
+	err = checkRedirect(reqSafe, []*http.Request{req})
+	if err != nil {
+		t.Errorf("expected nil error for safe redirect, got %v", err)
+	}
 }

@@ -7,6 +7,7 @@ import (
 	"crypto/tls"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -168,7 +169,24 @@ func main() {
 
 	httpClient := &http.Client{
 		Transport: transport,
-		// Timeout is handled via context per-request
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			if len(via) >= 10 {
+				return errors.New("stopped after 10 redirects")
+			}
+			// Security: prevent redirect to non-HTTP schemes (like file://)
+			if req.URL.Scheme != "http" && req.URL.Scheme != "https" {
+				return fmt.Errorf("redirect to unsafe scheme: %s", req.URL.Scheme)
+			}
+			/* 
+			   // Optional: Block Private IPs if we wanted strict SSRF protection
+			   // Not enabled by default to allow internal scanning if desired
+			   hostname := req.URL.Hostname()
+			   if isPrivateIP(hostname) {
+			       return fmt.Errorf("redirect to private IP: %s", hostname) 
+			   }
+			*/
+			return nil
+		},
 	}
 
 	if verbose {
