@@ -20,6 +20,8 @@ import (
 	"strings"
 	"time"
 
+	"context"
+
 	"github.com/PuerkitoBio/goquery"
 	"github.com/spaolacci/murmur3"
 )
@@ -95,9 +97,9 @@ type RulesFile struct {
 type radarSubmitResponse struct {
 	API        string `json:"api"`
 	Message    string `json:"message"`
-	Result     string `json:"result"`    // URL ke halaman scan publik
-	URL        string `json:"url"`       // URL yang disubmit (canonical)
-	UUID       string `json:"uuid"`      // scan ID
+	Result     string `json:"result"` // URL ke halaman scan publik
+	URL        string `json:"url"`    // URL yang disubmit (canonical)
+	UUID       string `json:"uuid"`   // scan ID
 	Visibility string `json:"visibility"`
 }
 
@@ -154,11 +156,26 @@ func main() {
 		log.Fatalf("failed to load rules: %v\n", err)
 	}
 
+	// Init shared HTTP client with custom Transport
+	transport := &http.Transport{
+		Proxy:                 http.ProxyFromEnvironment,
+		MaxIdleConns:          100,
+		MaxIdleConnsPerHost:   10,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+	}
+
+	httpClient := &http.Client{
+		Transport: transport,
+		// Timeout is handled via context per-request
+	}
+
 	if verbose {
 		log.Printf("[*] Scanning target: %s (deep=%v, radar=%v)\n", target, deepMode, useRadar)
 	}
 
-	info, err := scan(target, verbose, deepMode, useRadar, rules)
+	info, err := scan(httpClient, target, verbose, deepMode, useRadar, rules)
 	if err != nil {
 		log.Fatalf("scan failed: %v\n", err)
 	}
@@ -333,13 +350,13 @@ func max(a, b int) int {
 
 // ===== Scanner core =====
 
-func scan(rawURL string, verbose bool, deepMode bool, useRadar bool, rules *RulesFile) (*TechStack, error) {
+func scan(client *http.Client, rawURL string, verbose bool, deepMode bool, useRadar bool, rules *RulesFile) (*TechStack, error) {
 	normalized := normalizeURL(rawURL)
 	if verbose {
 		log.Printf("[*] Normalized URL: %s\n", normalized)
 	}
 
-	resp, err := fetch(normalized)
+	resp, err := fetch(client, normalized)
 	if err != nil {
 		return nil, err
 	}
@@ -379,11 +396,11 @@ func scan(rawURL string, verbose bool, deepMode bool, useRadar bool, rules *Rule
 		log.Printf("[*] TLS: valid=%v issuer=%s\n", tlsValid, tlsIssuer)
 	}
 
-	favSHA, favMMH, favMD5 := hashFavicon(finalURL, verbose)
+	favSHA, favMMH, favMD5 := hashFavicon(client, finalURL, verbose)
 
 	var probes []ProbeResult
 	if deepMode {
-		probes = probePaths(finalURL, verbose)
+		probes = probePaths(client, finalURL, verbose)
 	}
 
 	env := &ScanEnv{
@@ -407,7 +424,7 @@ func scan(rawURL string, verbose bool, deepMode bool, useRadar bool, rules *Rule
 		if verbose {
 			log.Printf("[*] Radar: enabled, sending URL to Cloudflare URL Scanner\n")
 		}
-		radarRes, rawRadar, radarUUID, err := radarScan(finalURL, verbose)
+		radarRes, rawRadar, radarUUID, err := radarScan(client, finalURL, verbose)
 		if err != nil {
 			if verbose {
 				log.Printf("[!] Radar scan failed: %v\n", err)
@@ -421,23 +438,23 @@ func scan(rawURL string, verbose bool, deepMode bool, useRadar bool, rules *Rule
 	}
 
 	ts := &TechStack{
-		URL:         rawURL,
-		FinalURL:    finalURL,
-		Headers:     headers,
-		TLSValid:    tlsValid,
-		TLSIssuer:   tlsIssuer,
-		IPs:         ips,
-		CNAME:       cname,
-		ReverseDNS:  reverse,
-		FaviconSHA1: favSHA,
-		FaviconMMH3: favMMH,
-		FaviconMD5:  favMD5,
-		CMS:         mergeAndUnique(detected["cms"], radarCats["cms"]),
-		Frontend:    mergeAndUnique(detected["frontend"], radarCats["frontend"]),
-		Backend:     mergeAndUnique(detected["backend"], radarCats["backend"]),
-		Analytics:   mergeAndUnique(detected["analytics"], radarCats["analytics"]),
-		CDN:         mergeAndUnique(detected["cdn"], radarCats["cdn"]),
-		Hosting:     mergeAndUnique(detected["hosting"], radarCats["hosting"]),
+		URL:          rawURL,
+		FinalURL:     finalURL,
+		Headers:      headers,
+		TLSValid:     tlsValid,
+		TLSIssuer:    tlsIssuer,
+		IPs:          ips,
+		CNAME:        cname,
+		ReverseDNS:   reverse,
+		FaviconSHA1:  favSHA,
+		FaviconMMH3:  favMMH,
+		FaviconMD5:   favMD5,
+		CMS:          mergeAndUnique(detected["cms"], radarCats["cms"]),
+		Frontend:     mergeAndUnique(detected["frontend"], radarCats["frontend"]),
+		Backend:      mergeAndUnique(detected["backend"], radarCats["backend"]),
+		Analytics:    mergeAndUnique(detected["analytics"], radarCats["analytics"]),
+		CDN:          mergeAndUnique(detected["cdn"], radarCats["cdn"]),
+		Hosting:      mergeAndUnique(detected["hosting"], radarCats["hosting"]),
 		Fingerprints: detected["fingerprint"],
 	}
 
@@ -474,11 +491,11 @@ func normalizeURL(target string) string {
 	return target
 }
 
-func fetch(target string) (*http.Response, error) {
-	client := &http.Client{
-		Timeout: 20 * time.Second,
-	}
-	req, err := http.NewRequest("GET", target, nil)
+func fetch(client *http.Client, target string) (*http.Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "GET", target, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -561,7 +578,7 @@ func checkTLS(host string) (bool, string) {
 	return true, ""
 }
 
-func hashFavicon(pageURL string, verbose bool) (string, uint32, string) {
+func hashFavicon(client *http.Client, pageURL string, verbose bool) (string, uint32, string) {
 	u, err := url.Parse(pageURL)
 	if err != nil || u.Scheme == "" || u.Host == "" {
 		if verbose {
@@ -577,8 +594,10 @@ func hashFavicon(pageURL string, verbose bool) (string, uint32, string) {
 		log.Printf("[*] Fetching favicon: %s\n", favURL)
 	}
 
-	client := &http.Client{Timeout: 7 * time.Second}
-	req, err := http.NewRequest("GET", favURL, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), 7*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "GET", favURL, nil)
 	if err != nil {
 		return "N/A", 0, ""
 	}
@@ -627,7 +646,7 @@ func hashFavicon(pageURL string, verbose bool) (string, uint32, string) {
 }
 
 // Deep probing: path signatures + 404/error page
-func probePaths(finalURL string, verbose bool) []ProbeResult {
+func probePaths(client *http.Client, finalURL string, verbose bool) []ProbeResult {
 	u, err := url.Parse(finalURL)
 	if err != nil || u.Scheme == "" || u.Host == "" {
 		if verbose {
@@ -649,7 +668,6 @@ func probePaths(finalURL string, verbose bool) []ProbeResult {
 	randomPath := fmt.Sprintf("/__stackscanner_%d__", rand.Intn(1_000_000_000))
 	paths = append(paths, randomPath)
 
-	client := &http.Client{Timeout: 10 * time.Second}
 	var probes []ProbeResult
 
 	for _, p := range paths {
@@ -657,8 +675,12 @@ func probePaths(finalURL string, verbose bool) []ProbeResult {
 		if verbose {
 			log.Printf("[*] Probe %s\n", full)
 		}
-		req, err := http.NewRequest("GET", full, nil)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		
+		req, err := http.NewRequestWithContext(ctx, "GET", full, nil)
 		if err != nil {
+			cancel()
 			if verbose {
 				log.Printf("[!] probe request build error for %s: %v\n", full, err)
 			}
@@ -673,6 +695,7 @@ func probePaths(finalURL string, verbose bool) []ProbeResult {
 
 		resp, err := client.Do(req)
 		if err != nil {
+			cancel()
 			if verbose {
 				log.Printf("[!] probe error for %s: %v\n", full, err)
 			}
@@ -680,6 +703,7 @@ func probePaths(finalURL string, verbose bool) []ProbeResult {
 		}
 		body, _ := io.ReadAll(resp.Body)
 		_ = resp.Body.Close()
+		cancel()
 
 		sample := strings.ToLower(string(body))
 		const maxSample = 1024
@@ -703,14 +727,12 @@ func probePaths(finalURL string, verbose bool) []ProbeResult {
 
 // ===== Cloudflare Radar URL Scanner integration =====
 
-func radarScan(targetURL string, verbose bool) (*radarScanResult, []byte, string, error) {
+func radarScan(client *http.Client, targetURL string, verbose bool) (*radarScanResult, []byte, string, error) {
 	accountID := os.Getenv("CF_RADAR_ACCOUNT_ID")
 	apiToken := os.Getenv("CF_API_TOKEN")
 	if accountID == "" || apiToken == "" {
 		return nil, nil, "", fmt.Errorf("CF_RADAR_ACCOUNT_ID / CF_API_TOKEN not set")
 	}
-
-	client := &http.Client{Timeout: 60 * time.Second}
 
 	submitUUID, err := radarSubmit(client, accountID, apiToken, targetURL, verbose)
 	if err != nil {
@@ -745,7 +767,11 @@ func radarSubmit(client *http.Client, accountID, token, urlStr string, verbose b
 	}
 
 	endpoint := fmt.Sprintf("https://api.cloudflare.com/client/v4/accounts/%s/urlscanner/v2/scan", accountID)
-	req, err := http.NewRequest("POST", endpoint, bytes.NewReader(payload))
+	
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", endpoint, bytes.NewReader(payload))
 	if err != nil {
 		return "", fmt.Errorf("radar submit build: %w", err)
 	}
@@ -790,19 +816,24 @@ func radarPollResult(client *http.Client, accountID, token, uuid string, interva
 		if time.Now().After(deadline) {
 			return nil, fmt.Errorf("radar poll timeout (uuid=%s)", uuid)
 		}
+		
+		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 
-		req, err := http.NewRequest("GET", endpoint, nil)
+		req, err := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
 		if err != nil {
+			cancel()
 			return nil, fmt.Errorf("radar poll build: %w", err)
 		}
 		req.Header.Set("Authorization", "Bearer "+token)
 
 		resp, err := client.Do(req)
 		if err != nil {
+			cancel()
 			return nil, fmt.Errorf("radar poll do: %w", err)
 		}
 		body, err := io.ReadAll(resp.Body)
 		resp.Body.Close()
+		cancel()
 		if err != nil {
 			return nil, fmt.Errorf("radar poll read: %w", err)
 		}

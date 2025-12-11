@@ -1,0 +1,1044 @@
+{
+  "data": {
+    "requests": [
+      {
+        "request": {
+          "requestId": "192289A0AA49B49EFA779FA77433E055",
+          "uuid": "8041f1be-b4f7-423d-b31c-7842e95cb83c",
+          "loaderId": "192289A0AA49B49EFA779FA77433E055",
+          "documentURL": "https://www.rafael.co.il/",
+          "request": {
+            "url": "https://www.rafael.co.il/",
+            "method": "GET",
+            "headers": {
+              "Accept-Language": "en-US",
+              "Upgrade-Insecure-Requests": "1",
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+              "sec-ch-ua": "\"Google Chrome\";v=\"126\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"119\"",
+              "sec-ch-ua-platform": "Win32",
+              "signature": "sig1=:Oz4YGeEl3v/UvyybCh2fT/DAUwqjhx1ZcKPPIwbDY6PqO8UudNcKSgJUCsNI5HGcTq5GraiQnHQl0UWBEVQZDQ==:",
+              "signature-agent": "\"https://web-bot-auth-directory.radar.cloudflare.com\"",
+              "signature-input": "sig1=(\"@authority\" \"signature-agent\");created=1765349817;keyid=\"Y0MXjw6k-M9WhKMPkVAjQtqc8hhEhc49xEEyl0FZgyM\";alg=\"ed25519\";expires=1765350117;nonce=\"ijs2ytRz9Fkf1gn/f2hLCYkrbyof8L1b+HP35wurrXHoUxLiCSnrUmmTKUg/nU0Hr224Zy/OGfv7QxgZEAoNzg==\";tag=\"web-bot-auth\"",
+              "Accept-Encoding": "gzip, deflate, br, zstd",
+              "Connection": "keep-alive",
+              "Host": "www.rafael.co.il",
+              "Sec-Fetch-Dest": "document",
+              "Sec-Fetch-Mode": "navigate",
+              "Sec-Fetch-Site": "none",
+              "Sec-Fetch-User": "?1",
+              "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+              "accept-language": "en-US",
+              "upgrade-insecure-requests": "1",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+            },
+            "mixedContentType": "none",
+            "initialPriority": "VeryHigh",
+            "referrerPolicy": "",
+            "isSameSite": true
+          },
+          "wallTime": 1765349818324,
+          "initiator": { "type": "other", "url": "", "host": "" },
+          "redirectHasExtraInfo": false,
+          "type": "document",
+          "frameId": "1DEC88A055CBCCE28CF11631803CDA38",
+          "hasUserGesture": false,
+          "primaryRequest": true
+        },
+        "response": {
+          "encodedDataLength": 587,
+          "dataLength": 575,
+          "requestId": "192289A0AA49B49EFA779FA77433E055",
+          "type": "document",
+          "response": {
+            "url": "https://www.rafael.co.il/",
+            "status": 247,
+            "statusText": "",
+            "headers": {
+              "Cache-Control": "no-cache",
+              "Connection": "keep-alive",
+              "Content-Type": "text/html; charset=utf-8",
+              "Date": "Wed, 10 Dec 2025 06:56:59 GMT",
+              "Expires": "Thu, 01 Aug 1978 00:01:48 GMT",
+              "Server": "nginx",
+              "Transfer-Encoding": "chunked",
+              "X-L11-Trace": "ash3-lb2",
+              "X-Proxy-Cache": "MISS"
+            },
+            "mimeType": "text/html",
+            "charset": "",
+            "remoteIPAddress": "128.65.223.19",
+            "remotePort": 443,
+            "protocol": "http/1.1",
+            "securityState": "secure",
+            "securityDetails": {
+              "protocol": "TLS 1.3",
+              "keyExchange": "",
+              "keyExchangeGroup": "X25519",
+              "cipher": "AES_256_GCM",
+              "certificateId": 0,
+              "subjectName": "www.rafael.co.il",
+              "sanList": ["www.rafael.co.il"],
+              "issuer": "",
+              "validFrom": 1765263418,
+              "validTo": 1796885818,
+              "signedCertificateTimestampList": [],
+              "certificateTransparencyCompliance": "unknown",
+              "serverSignatureAlgorithm": 2052,
+              "encryptedClientHello": false
+            },
+            "securityHeaders": []
+          },
+          "hasExtraInfo": true,
+          "size": 575,
+          "hash": "c8cffff04cdef9e1824794f143f6a081dcd8ba1a8f2ef4472ffd15fb128b67e6",
+          "contentAvailable": true,
+          "asn": {
+            "ip": "128.65.223.19",
+            "asn": "34309",
+            "country": "DE",
+            "description": "Link11 GmbH",
+            "name": "LINK11",
+            "org": "Link11 GmbH"
+          },
+          "geoip": {
+            "country": "DE",
+            "region": "Hesse",
+            "city": "Regierungsbezirk Darmstadt",
+            "ll": [50, 8.75],
+            "country_name": "Germany",
+            "geonameId": "2938912"
+          }
+        }
+      },
+      {
+        "request": {
+          "requestId": "879.2",
+          "uuid": "ec67858e-09d4-4db8-aa3e-88f227eb7d7c",
+          "loaderId": "192289A0AA49B49EFA779FA77433E055",
+          "documentURL": "https://www.rafael.co.il/",
+          "request": {
+            "url": "https://www.rafael.co.il/kramericaindustries.ac.lib.js",
+            "method": "GET",
+            "headers": {
+              "sec-ch-ua": "\"Google Chrome\";v=\"126\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"119\"",
+              "signature-agent": "\"https://web-bot-auth-directory.radar.cloudflare.com\"",
+              "Accept-Language": "en-US",
+              "signature-input": "sig1=(\"@authority\" \"signature-agent\");created=1765349817;keyid=\"Y0MXjw6k-M9WhKMPkVAjQtqc8hhEhc49xEEyl0FZgyM\";alg=\"ed25519\";expires=1765350117;nonce=\"ijs2ytRz9Fkf1gn/f2hLCYkrbyof8L1b+HP35wurrXHoUxLiCSnrUmmTKUg/nU0Hr224Zy/OGfv7QxgZEAoNzg==\";tag=\"web-bot-auth\"",
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+              "Referer": "https://www.rafael.co.il/",
+              "signature": "sig1=:Oz4YGeEl3v/UvyybCh2fT/DAUwqjhx1ZcKPPIwbDY6PqO8UudNcKSgJUCsNI5HGcTq5GraiQnHQl0UWBEVQZDQ==:",
+              "sec-ch-ua-platform": "Win32",
+              "Accept-Encoding": "gzip, deflate, br, zstd",
+              "Connection": "keep-alive",
+              "Host": "www.rafael.co.il",
+              "Sec-Fetch-Dest": "script",
+              "Sec-Fetch-Mode": "no-cors",
+              "Sec-Fetch-Site": "same-origin",
+              "accept": "*/*",
+              "accept-language": "en-US",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+            },
+            "mixedContentType": "none",
+            "initialPriority": "High",
+            "referrerPolicy": "",
+            "isSameSite": true
+          },
+          "wallTime": 1765349819513,
+          "initiator": {
+            "type": "parser",
+            "url": "https://www.rafael.co.il/",
+            "host": "www.rafael.co.il"
+          },
+          "redirectHasExtraInfo": false,
+          "type": "script",
+          "frameId": "1DEC88A055CBCCE28CF11631803CDA38",
+          "hasUserGesture": false
+        },
+        "response": {
+          "encodedDataLength": 13778,
+          "dataLength": 42406,
+          "requestId": "879.2",
+          "type": "script",
+          "response": {
+            "url": "https://www.rafael.co.il/kramericaindustries.ac.lib.js",
+            "status": 200,
+            "statusText": "OK",
+            "headers": {
+              "Date": "Wed, 10 Dec 2025 06:57:00 GMT",
+              "Content-Encoding": "gzip",
+              "Last-Modified": "Fri, 05 Dec 2025 07:54:02 GMT",
+              "Server": "nginx",
+              "ETag": "W/\"69328f9a-a5a6\"",
+              "Transfer-Encoding": "chunked",
+              "Vary": "Accept-Encoding",
+              "Content-Type": "application/javascript",
+              "X-L11-Trace": "ash3-lb2",
+              "Connection": "keep-alive",
+              "X-Proxy-Cache": "MISS"
+            },
+            "mimeType": "application/javascript",
+            "charset": "",
+            "remoteIPAddress": "128.65.223.19",
+            "remotePort": 443,
+            "protocol": "http/1.1",
+            "securityState": "secure",
+            "securityDetails": {
+              "protocol": "TLS 1.3",
+              "keyExchange": "",
+              "keyExchangeGroup": "X25519",
+              "cipher": "AES_256_GCM",
+              "certificateId": 0,
+              "subjectName": "www.rafael.co.il",
+              "sanList": ["www.rafael.co.il"],
+              "issuer": "",
+              "validFrom": 1765263418,
+              "validTo": 1796885818,
+              "signedCertificateTimestampList": [],
+              "certificateTransparencyCompliance": "unknown",
+              "serverSignatureAlgorithm": 2052,
+              "encryptedClientHello": false
+            },
+            "securityHeaders": []
+          },
+          "hasExtraInfo": true,
+          "size": 42406,
+          "hash": "ae445fbd2829b45f50ea9105d0907b57515ca958b05b9deea71ecf6665292825",
+          "contentAvailable": true,
+          "asn": {
+            "ip": "128.65.223.19",
+            "asn": "34309",
+            "country": "DE",
+            "description": "Link11 GmbH",
+            "name": "LINK11",
+            "org": "Link11 GmbH"
+          },
+          "geoip": {
+            "country": "DE",
+            "region": "Hesse",
+            "city": "Regierungsbezirk Darmstadt",
+            "ll": [50, 8.75],
+            "country_name": "Germany",
+            "geonameId": "2938912"
+          }
+        },
+        "initiatorInfo": {
+          "type": "parser",
+          "url": "https://www.rafael.co.il/",
+          "host": "www.rafael.co.il"
+        }
+      },
+      {
+        "request": {
+          "requestId": "879.4",
+          "uuid": "878d1346-3339-4c76-8832-678320075aef",
+          "loaderId": "192289A0AA49B49EFA779FA77433E055",
+          "documentURL": "https://www.rafael.co.il/",
+          "request": {
+            "url": "https://www.rafael.co.il/wp-content/uploads/2024/05/favicon.png",
+            "method": "GET",
+            "headers": {
+              "sec-ch-ua": "\"Google Chrome\";v=\"126\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"119\"",
+              "Referer": "https://www.rafael.co.il/",
+              "signature": "sig1=:Oz4YGeEl3v/UvyybCh2fT/DAUwqjhx1ZcKPPIwbDY6PqO8UudNcKSgJUCsNI5HGcTq5GraiQnHQl0UWBEVQZDQ==:",
+              "signature-agent": "\"https://web-bot-auth-directory.radar.cloudflare.com\"",
+              "signature-input": "sig1=(\"@authority\" \"signature-agent\");created=1765349817;keyid=\"Y0MXjw6k-M9WhKMPkVAjQtqc8hhEhc49xEEyl0FZgyM\";alg=\"ed25519\";expires=1765350117;nonce=\"ijs2ytRz9Fkf1gn/f2hLCYkrbyof8L1b+HP35wurrXHoUxLiCSnrUmmTKUg/nU0Hr224Zy/OGfv7QxgZEAoNzg==\";tag=\"web-bot-auth\"",
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+              "sec-ch-ua-platform": "Win32",
+              "Accept-Encoding": "gzip, deflate, br, zstd",
+              "Connection": "keep-alive",
+              "Host": "www.rafael.co.il",
+              "Sec-Fetch-Dest": "image",
+              "Sec-Fetch-Mode": "no-cors",
+              "Sec-Fetch-Site": "same-origin",
+              "accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+              "accept-language": "en-US",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+            },
+            "mixedContentType": "none",
+            "initialPriority": "High",
+            "referrerPolicy": "",
+            "isSameSite": true
+          },
+          "wallTime": 1765349820443,
+          "initiator": { "type": "other", "url": "", "host": "" },
+          "redirectHasExtraInfo": true,
+          "type": "other",
+          "frameId": "1DEC88A055CBCCE28CF11631803CDA38",
+          "hasUserGesture": false,
+          "redirectResponse": {
+            "url": "https://www.rafael.co.il/favicon.ico",
+            "status": 302,
+            "statusText": "Found",
+            "headers": {
+              "Expires": "Sun, 08 Feb 2026 06:53:13 GMT",
+              "Date": "Wed, 10 Dec 2025 06:57:00 GMT",
+              "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+              "X-Content-Type-Options": "nosniff",
+              "X-Powered-By": "",
+              "X-Redirect-By": "WordPress",
+              "X-L11-Trace": "ash3-lb2",
+              "Connection": "keep-alive",
+              "Content-Length": "0",
+              "X-XSS-Protection": "1; mode=block",
+              "Pragma": "public",
+              "Referrer-Policy": "strict-origin-when-cross-origin",
+              "Server": "nginx",
+              "X-Frame-Options": "SAMEORIGIN",
+              "Content-Type": "text/html; charset=UTF-8",
+              "Access-Control-Allow-Origin": "https://www.rafael.co.il",
+              "Location": "https://www.rafael.co.il/wp-content/uploads/2024/05/favicon.png",
+              "Cache-Control": "max-age=3600, s-maxage=14400, public",
+              "Permissions-Policy": "camera=(), gyroscope=(), magnetometer=(), payment=(), usb=()",
+              "Link": "<https://www.rafael.co.il/wp-json/>; rel=\"https://api.w.org/\"",
+              "X-Proxy-Cache": "HIT"
+            },
+            "mimeType": "text/html",
+            "charset": "",
+            "remoteIPAddress": "128.65.223.19",
+            "remotePort": 443,
+            "protocol": "http/1.1",
+            "securityState": "",
+            "securityHeaders": []
+          }
+        },
+        "response": {
+          "encodedDataLength": 232,
+          "dataLength": 232,
+          "requestId": "879.4",
+          "type": "other",
+          "response": {
+            "url": "https://www.rafael.co.il/wp-content/uploads/2024/05/favicon.png",
+            "status": 200,
+            "statusText": "OK",
+            "headers": {
+              "Expires": "Sun, 08 Feb 2026 06:50:02 GMT",
+              "Date": "Wed, 10 Dec 2025 06:57:00 GMT",
+              "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+              "X-Content-Type-Options": "nosniff",
+              "X-L11-Trace": "ash3-lb2",
+              "Connection": "keep-alive",
+              "Content-Length": "232",
+              "X-XSS-Protection": "1; mode=block",
+              "Pragma": "public",
+              "Referrer-Policy": "strict-origin-when-cross-origin",
+              "Last-Modified": "Tue, 07 May 2024 10:21:26 GMT",
+              "Server": "nginx",
+              "X-Frame-Options": "SAMEORIGIN",
+              "Content-Type": "image/png",
+              "Cache-Control": "max-age=3600, s-maxage=14400, public",
+              "Permissions-Policy": "camera=(), gyroscope=(), magnetometer=(), payment=(), usb=()",
+              "Accept-Ranges": "bytes",
+              "X-Proxy-Cache": "HIT"
+            },
+            "mimeType": "image/png",
+            "charset": "",
+            "remoteIPAddress": "128.65.223.19",
+            "remotePort": 443,
+            "protocol": "http/1.1",
+            "securityState": "",
+            "securityHeaders": []
+          },
+          "hasExtraInfo": true,
+          "size": 232,
+          "hash": "d4c0274c1d9234dc90680bbed857c2b863d331e92aa42fbb2ee3bf819ec354b9",
+          "contentAvailable": false,
+          "asn": {
+            "ip": "128.65.223.19",
+            "asn": "34309",
+            "country": "DE",
+            "description": "Link11 GmbH",
+            "name": "LINK11",
+            "org": "Link11 GmbH"
+          },
+          "geoip": {
+            "country": "DE",
+            "region": "Hesse",
+            "city": "Regierungsbezirk Darmstadt",
+            "ll": [50, 8.75],
+            "country_name": "Germany",
+            "geonameId": "2938912"
+          }
+        },
+        "requests": [
+          {
+            "requestId": "879.4",
+            "loaderId": "192289A0AA49B49EFA779FA77433E055",
+            "frameId": "1DEC88A055CBCCE28CF11631803CDA38",
+            "documentURL": "https://www.rafael.co.il/favicon.ico",
+            "wallTime": 1765349820303,
+            "request": {
+              "url": "https://www.rafael.co.il/favicon.ico",
+              "method": "GET",
+              "headers": {
+                "sec-ch-ua": "\"Google Chrome\";v=\"126\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"119\"",
+                "signature-agent": "\"https://web-bot-auth-directory.radar.cloudflare.com\"",
+                "Accept-Language": "en-US",
+                "signature-input": "sig1=(\"@authority\" \"signature-agent\");created=1765349817;keyid=\"Y0MXjw6k-M9WhKMPkVAjQtqc8hhEhc49xEEyl0FZgyM\";alg=\"ed25519\";expires=1765350117;nonce=\"ijs2ytRz9Fkf1gn/f2hLCYkrbyof8L1b+HP35wurrXHoUxLiCSnrUmmTKUg/nU0Hr224Zy/OGfv7QxgZEAoNzg==\";tag=\"web-bot-auth\"",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+                "Referer": "https://www.rafael.co.il/",
+                "signature": "sig1=:Oz4YGeEl3v/UvyybCh2fT/DAUwqjhx1ZcKPPIwbDY6PqO8UudNcKSgJUCsNI5HGcTq5GraiQnHQl0UWBEVQZDQ==:",
+                "sec-ch-ua-platform": "Win32",
+                "Accept-Encoding": "gzip, deflate, br, zstd",
+                "Connection": "keep-alive",
+                "Host": "www.rafael.co.il",
+                "Sec-Fetch-Dest": "image",
+                "Sec-Fetch-Mode": "no-cors",
+                "Sec-Fetch-Site": "same-origin",
+                "accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+                "accept-language": "en-US",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+              },
+              "mixedContentType": "none",
+              "initialPriority": "High",
+              "referrerPolicy": "",
+              "isSameSite": true
+            },
+            "type": "other",
+            "initiator": { "type": "other" },
+            "hasUserGesture": false,
+            "redirectHasExtraInfo": false,
+            "uuid": "f13d2116-82bb-4f48-a30a-86b1ce617818"
+          },
+          {
+            "requestId": "879.4",
+            "loaderId": "192289A0AA49B49EFA779FA77433E055",
+            "frameId": "1DEC88A055CBCCE28CF11631803CDA38",
+            "documentURL": "https://www.rafael.co.il/wp-content/uploads/2024/05/favicon.png",
+            "wallTime": 1765349820443,
+            "request": {
+              "url": "https://www.rafael.co.il/wp-content/uploads/2024/05/favicon.png",
+              "method": "GET",
+              "headers": {
+                "sec-ch-ua": "\"Google Chrome\";v=\"126\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"119\"",
+                "Referer": "https://www.rafael.co.il/",
+                "signature": "sig1=:Oz4YGeEl3v/UvyybCh2fT/DAUwqjhx1ZcKPPIwbDY6PqO8UudNcKSgJUCsNI5HGcTq5GraiQnHQl0UWBEVQZDQ==:",
+                "signature-agent": "\"https://web-bot-auth-directory.radar.cloudflare.com\"",
+                "signature-input": "sig1=(\"@authority\" \"signature-agent\");created=1765349817;keyid=\"Y0MXjw6k-M9WhKMPkVAjQtqc8hhEhc49xEEyl0FZgyM\";alg=\"ed25519\";expires=1765350117;nonce=\"ijs2ytRz9Fkf1gn/f2hLCYkrbyof8L1b+HP35wurrXHoUxLiCSnrUmmTKUg/nU0Hr224Zy/OGfv7QxgZEAoNzg==\";tag=\"web-bot-auth\"",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+                "sec-ch-ua-platform": "Win32",
+                "Accept-Encoding": "gzip, deflate, br, zstd",
+                "Connection": "keep-alive",
+                "Host": "www.rafael.co.il",
+                "Sec-Fetch-Dest": "image",
+                "Sec-Fetch-Mode": "no-cors",
+                "Sec-Fetch-Site": "same-origin",
+                "accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+                "accept-language": "en-US",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+              },
+              "mixedContentType": "none",
+              "initialPriority": "High",
+              "referrerPolicy": "",
+              "isSameSite": true
+            },
+            "type": "other",
+            "initiator": { "type": "other" },
+            "hasUserGesture": false,
+            "redirectHasExtraInfo": true,
+            "uuid": "878d1346-3339-4c76-8832-678320075aef",
+            "redirectResponse": {
+              "url": "https://www.rafael.co.il/favicon.ico",
+              "status": 302,
+              "statusText": "Found",
+              "headers": {
+                "Expires": "Sun, 08 Feb 2026 06:53:13 GMT",
+                "Date": "Wed, 10 Dec 2025 06:57:00 GMT",
+                "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+                "X-Content-Type-Options": "nosniff",
+                "X-Powered-By": "",
+                "X-Redirect-By": "WordPress",
+                "X-L11-Trace": "ash3-lb2",
+                "Connection": "keep-alive",
+                "Content-Length": "0",
+                "X-XSS-Protection": "1; mode=block",
+                "Pragma": "public",
+                "Referrer-Policy": "strict-origin-when-cross-origin",
+                "Server": "nginx",
+                "X-Frame-Options": "SAMEORIGIN",
+                "Content-Type": "text/html; charset=UTF-8",
+                "Access-Control-Allow-Origin": "https://www.rafael.co.il",
+                "Location": "https://www.rafael.co.il/wp-content/uploads/2024/05/favicon.png",
+                "Cache-Control": "max-age=3600, s-maxage=14400, public",
+                "Permissions-Policy": "camera=(), gyroscope=(), magnetometer=(), payment=(), usb=()",
+                "Link": "<https://www.rafael.co.il/wp-json/>; rel=\"https://api.w.org/\"",
+                "X-Proxy-Cache": "HIT"
+              },
+              "mimeType": "text/html",
+              "charset": "",
+              "remoteIPAddress": "128.65.223.19",
+              "remotePort": 443,
+              "protocol": "http/1.1",
+              "securityState": "",
+              "securityHeaders": []
+            }
+          }
+        ]
+      }
+    ],
+    "cookies": [],
+    "console": [],
+    "links": [],
+    "globals": [
+      { "prop": "event", "type": "undefined" },
+      { "prop": "onbeforetoggle", "type": "object" },
+      { "prop": "fence", "type": "object" },
+      { "prop": "sharedStorage", "type": "object" },
+      { "prop": "documentPictureInPicture", "type": "object" },
+      { "prop": "fetchLater", "type": "function" },
+      { "prop": "onpageswap", "type": "object" },
+      { "prop": "onpagereveal", "type": "object" },
+      { "prop": "model", "type": "object" },
+      { "prop": "onscrollend", "type": "object" },
+      { "prop": "n3EE", "type": "function" },
+      { "prop": "e8NN", "type": "function" },
+      { "prop": "f1xx", "type": "function" },
+      { "prop": "v1xx", "type": "function" },
+      { "prop": "b2JJ", "type": "function" },
+      { "prop": "idx", "type": "string" },
+      { "prop": "test", "type": "string" },
+      { "prop": "winsocks", "type": "function" },
+      { "prop": "rbzns", "type": "object" }
+    ],
+    "performance": [
+      {
+        "name": "https://www.rafael.co.il/",
+        "entryType": "navigation",
+        "startTime": 0,
+        "duration": 2009.5999999999767,
+        "initiatorType": "navigation",
+        "deliveryType": "",
+        "nextHopProtocol": "http/1.1",
+        "renderBlockingStatus": "non-blocking",
+        "workerStart": 0,
+        "redirectStart": 0,
+        "redirectEnd": 0,
+        "fetchStart": 0.5,
+        "domainLookupStart": 0.5,
+        "domainLookupEnd": 0.5,
+        "connectStart": 0.5,
+        "secureConnectionStart": 0.5,
+        "connectEnd": 0.5,
+        "requestStart": 80,
+        "responseStart": 1197.0999999999767,
+        "firstInterimResponseStart": 0,
+        "responseEnd": 1198.4000000000233,
+        "transferSize": 875,
+        "encodedBodySize": 575,
+        "decodedBodySize": 575,
+        "responseStatus": 247,
+        "serverTiming": [],
+        "unloadEventStart": 0,
+        "unloadEventEnd": 0,
+        "domInteractive": 2008.9000000000233,
+        "domContentLoadedEventStart": 2008.9000000000233,
+        "domContentLoadedEventEnd": 2008.9000000000233,
+        "domComplete": 2009.2000000000698,
+        "loadEventStart": 2009.5999999999767,
+        "loadEventEnd": 2009.5999999999767,
+        "type": "navigate",
+        "redirectCount": 0,
+        "activationStart": 0,
+        "criticalCHRestart": 0,
+        "notRestoredReasons": null
+      },
+      {
+        "name": "visible",
+        "entryType": "visibility-state",
+        "startTime": 0,
+        "duration": 0
+      },
+      {
+        "name": "long-animation-frame",
+        "entryType": "long-animation-frame",
+        "startTime": 1202.8000000000466,
+        "duration": 807,
+        "renderStart": 2009.8000000000466,
+        "styleAndLayoutStart": 2009.9000000000233,
+        "firstUIEventTimestamp": 0,
+        "blockingDuration": 0,
+        "scripts": [
+          {
+            "name": "script",
+            "entryType": "script",
+            "startTime": 1978.0999999999767,
+            "duration": 30,
+            "invoker": "https://www.rafael.co.il/kramericaindustries.ac.lib.js",
+            "invokerType": "classic-script",
+            "windowAttribution": "self",
+            "executionStart": 1978.0999999999767,
+            "forcedStyleAndLayoutDuration": 0,
+            "pauseDuration": 0,
+            "sourceURL": "https://www.rafael.co.il/kramericaindustries.ac.lib.js",
+            "sourceFunctionName": "",
+            "sourceCharPosition": 0
+          }
+        ]
+      },
+      {
+        "name": "https://www.rafael.co.il/kramericaindustries.ac.lib.js",
+        "entryType": "resource",
+        "startTime": 1214.8000000000466,
+        "duration": 757.9000000000233,
+        "initiatorType": "script",
+        "deliveryType": "",
+        "nextHopProtocol": "http/1.1",
+        "renderBlockingStatus": "blocking",
+        "workerStart": 0,
+        "redirectStart": 0,
+        "redirectEnd": 0,
+        "fetchStart": 1214.8000000000466,
+        "domainLookupStart": 1214.8000000000466,
+        "domainLookupEnd": 1214.8000000000466,
+        "connectStart": 1214.8000000000466,
+        "secureConnectionStart": 1214.8000000000466,
+        "connectEnd": 1214.8000000000466,
+        "requestStart": 1268.5,
+        "responseStart": 1971.0999999999767,
+        "firstInterimResponseStart": 0,
+        "responseEnd": 1972.7000000000698,
+        "transferSize": 14065,
+        "encodedBodySize": 13765,
+        "decodedBodySize": 42406,
+        "responseStatus": 200,
+        "serverTiming": []
+      },
+      {
+        "name": "https://www.rafael.co.il/favicon.ico",
+        "entryType": "resource",
+        "startTime": 2011,
+        "duration": 277.9000000000233,
+        "initiatorType": "other",
+        "deliveryType": "",
+        "nextHopProtocol": "http/1.1",
+        "renderBlockingStatus": "non-blocking",
+        "workerStart": 0,
+        "redirectStart": 2011,
+        "redirectEnd": 2147.3000000000466,
+        "fetchStart": 2197.9000000000233,
+        "domainLookupStart": 2197.9000000000233,
+        "domainLookupEnd": 2197.9000000000233,
+        "connectStart": 2197.9000000000233,
+        "secureConnectionStart": 2197.9000000000233,
+        "connectEnd": 2197.9000000000233,
+        "requestStart": 2198.20000000007,
+        "responseStart": 2287.5,
+        "firstInterimResponseStart": 0,
+        "responseEnd": 2288.9000000000233,
+        "transferSize": 532,
+        "encodedBodySize": 232,
+        "decodedBodySize": 232,
+        "responseStatus": 200,
+        "serverTiming": []
+      }
+    ]
+  },
+  "lists": {
+    "ips": ["128.65.223.19"],
+    "countries": ["DE"],
+    "continents": ["Europe"],
+    "asns": ["34309"],
+    "domains": ["www.rafael.co.il"],
+    "servers": ["nginx"],
+    "urls": [
+      "https://www.rafael.co.il/",
+      "https://www.rafael.co.il/kramericaindustries.ac.lib.js",
+      "https://www.rafael.co.il/favicon.ico",
+      "https://www.rafael.co.il/wp-content/uploads/2024/05/favicon.png"
+    ],
+    "linkDomains": [],
+    "certificates": [
+      {
+        "issuer": "",
+        "subjectName": "www.rafael.co.il",
+        "validFrom": 1765263418,
+        "validTo": 1796885818
+      }
+    ],
+    "hashes": [
+      "c8cffff04cdef9e1824794f143f6a081dcd8ba1a8f2ef4472ffd15fb128b67e6",
+      "ae445fbd2829b45f50ea9105d0907b57515ca958b05b9deea71ecf6665292825",
+      "d4c0274c1d9234dc90680bbed857c2b863d331e92aa42fbb2ee3bf819ec354b9",
+      "8000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "-1055404396",
+      "ceaf73778c780746e42605e0059c8a3178f53982f50f5df2e0672880b2a8d06d"
+    ]
+  },
+  "meta": {
+    "processors": {
+      "geoip": {
+        "data": [
+          {
+            "ip": "128.65.223.19",
+            "geoip": {
+              "country": "DE",
+              "region": "Hesse",
+              "city": "Regierungsbezirk Darmstadt",
+              "ll": [50, 8.75],
+              "country_name": "Germany"
+            }
+          }
+        ]
+      },
+      "asn": {
+        "data": [
+          {
+            "ip": "128.65.223.19",
+            "asn": "34309",
+            "country": "DE",
+            "description": "Link11 GmbH",
+            "name": "LINK11"
+          }
+        ]
+      },
+      "wappa": {
+        "data": [
+          {
+            "confidence": [
+              {
+                "confidence": 100,
+                "pattern": "rel=\"https:\\/\\/api\\.w\\.org\\/\"",
+                "patternType": "headers",
+                "name": "link",
+                "match": "rel=\"https://api.w.org/\""
+              }
+            ],
+            "confidenceTotal": 100,
+            "app": "WordPress",
+            "icon": "WordPress.svg",
+            "website": "https://wordpress.org",
+            "description": "WordPress is a free and open-source content management system written in PHP and paired with a MySQL or MariaDB database. Features include a plugin architecture and a template system.",
+            "categories": [
+              { "name": "CMS", "priority": 1 },
+              { "name": "Blogs", "priority": 1 }
+            ]
+          },
+          {
+            "confidence": [],
+            "confidenceTotal": 100,
+            "app": "MySQL",
+            "icon": "MySQL.svg",
+            "website": "https://mysql.com",
+            "description": "MySQL is an open-source relational database management system.",
+            "categories": [{ "name": "Databases", "priority": 5 }]
+          },
+          {
+            "confidence": [],
+            "confidenceTotal": 100,
+            "app": "PHP",
+            "icon": "PHP.svg",
+            "website": "https://php.net",
+            "description": "PHP is a general-purpose scripting language used for web development.",
+            "categories": [{ "name": "Programming languages", "priority": 5 }]
+          },
+          {
+            "confidence": [
+              {
+                "confidence": 100,
+                "pattern": "nginx(?:\\/([\\d.]{1,250}))?",
+                "patternType": "headers",
+                "name": "server",
+                "match": "nginx"
+              }
+            ],
+            "confidenceTotal": 100,
+            "app": "Nginx",
+            "icon": "Nginx.svg",
+            "website": "https://nginx.org/en",
+            "description": "Nginx is a web server that can also be used as a reverse proxy, load balancer, mail proxy and HTTP cache.",
+            "categories": [
+              { "name": "Web servers", "priority": 8 },
+              { "name": "Reverse proxies", "priority": 7 }
+            ]
+          },
+          {
+            "confidence": [
+              {
+                "confidence": 100,
+                "pattern": "(?:)",
+                "patternType": "headers",
+                "name": "strict-transport-security",
+                "match": "strict-transport-security"
+              }
+            ],
+            "confidenceTotal": 100,
+            "app": "HSTS",
+            "icon": "default.svg",
+            "website": "https://www.rfc-editor.org/rfc/rfc6797#section-6.1",
+            "description": "HTTP Strict Transport Security (HSTS) informs browsers that the site should only be accessed using HTTPS.",
+            "categories": [{ "name": "Security", "priority": 9 }]
+          }
+        ]
+      },
+      "rdns": { "data": [] },
+      "domainCategories": {
+        "data": [
+          {
+            "name": "www.rafael.co.il",
+            "isPrimary": true,
+            "content": [
+              { "id": 75, "super_category_id": 3, "name": "Business" },
+              { "id": 3, "name": "Business & Economy" }
+            ],
+            "inherited": {}
+          }
+        ]
+      },
+      "dns": {
+        "data": [
+          {
+            "name": "www.rafael.co.il",
+            "address": "www-rafael-co-il.prod2.reblaze.com.",
+            "type": "CNAME",
+            "dnssec_valid": false
+          },
+          {
+            "name": "www-rafael-co-il.prod2.reblaze.com",
+            "address": "www-rafael-co-il.adi.prod2.reblaze.com.",
+            "type": "CNAME",
+            "dnssec_valid": false
+          },
+          {
+            "name": "www-rafael-co-il.adi.prod2.reblaze.com",
+            "address": "www-rafael-co-il.rafael.prod2.reblaze.com.",
+            "type": "CNAME",
+            "dnssec_valid": false
+          },
+          {
+            "name": "www-rafael-co-il.rafael.prod2.reblaze.com",
+            "address": "fire-prod-link11-d586.rafaelv5obtb.d1.rbzdns.com.",
+            "type": "CNAME",
+            "dnssec_valid": false
+          },
+          {
+            "name": "fire-prod-link11-d586.rafaelv5obtb.d1.rbzdns.com",
+            "address": "128.65.223.19",
+            "type": "A",
+            "dnssec_valid": false
+          },
+          {
+            "name": "www.rafael.co.il",
+            "address": "www-rafael-co-il.prod2.reblaze.com.",
+            "type": "CNAME",
+            "dnssec_valid": false
+          },
+          {
+            "name": "www-rafael-co-il.prod2.reblaze.com",
+            "address": "www-rafael-co-il.adi.prod2.reblaze.com.",
+            "type": "CNAME",
+            "dnssec_valid": false
+          },
+          {
+            "name": "www-rafael-co-il.adi.prod2.reblaze.com",
+            "address": "www-rafael-co-il.rafael.prod2.reblaze.com.",
+            "type": "CNAME",
+            "dnssec_valid": false
+          },
+          {
+            "name": "www-rafael-co-il.rafael.prod2.reblaze.com",
+            "address": "fire-prod-link11-d586.rafaelv5obtb.d1.rbzdns.com.",
+            "type": "CNAME",
+            "dnssec_valid": false
+          }
+        ]
+      },
+      "urlCategories": {
+        "data": [
+          { "name": "https://www.rafael.co.il/", "risks": [], "content": [] }
+        ]
+      },
+      "radarRank": {
+        "data": [
+          { "hostname": "rafael.co.il", "rank": null, "bucket": ">200000" }
+        ]
+      },
+      "phishing": { "data": [] },
+      "robotsTxt": {
+        "data": [
+          {
+            "rules": { "*": [] },
+            "sitemaps": ["https://www.rafael.co.il/sitemap_index.xml"],
+            "hash": "678650505d22c510276c5f4d94513a08527fbc491ed46f7125e44134941d6ce1"
+          }
+        ]
+      }
+    }
+  },
+  "page": {
+    "asn": "34309",
+    "asnname": "LINK11",
+    "city": "Regierungsbezirk Darmstadt",
+    "country": "Germany",
+    "domain": "www.rafael.co.il",
+    "ip": "128.65.223.19",
+    "server": "nginx",
+    "url": "https://www.rafael.co.il/",
+    "mimeType": "text/html",
+    "apexDomain": "rafael.co.il",
+    "status": "247",
+    "title": "",
+    "domStructHash": "ceaf73778c780746e42605e0059c8a3178f53982f50f5df2e0672880b2a8d06d",
+    "history": [
+      {
+        "url": "https://www.rafael.co.il/",
+        "statusCode": 247,
+        "uuid": "8041f1be-b4f7-423d-b31c-7842e95cb83c",
+        "requestId": "192289A0AA49B49EFA779FA77433E055"
+      }
+    ],
+    "screenshot": {
+      "phash": "8000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "dhash": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "mm3Hash": -1055404396,
+      "name": "desktop"
+    },
+    "tlsIssuer": "",
+    "tlsValidFrom": "2025-12-09T06:56:58.000Z",
+    "tlsAgeDays": 0,
+    "tlsValidDays": 366
+  },
+  "scanner": {
+    "colo": "DFW",
+    "browserSessionId": "fc073052-62a3-478a-a1ed-1394ccb34d28"
+  },
+  "stats": {
+    "IPv6Percentage": 0,
+    "domainStats": [
+      {
+        "count": 4,
+        "ips": ["128.65.223.19"],
+        "domain": "www.rafael.co.il",
+        "size": 43213,
+        "encodedSize": 14597,
+        "countries": ["DE"],
+        "index": 0,
+        "initiators": ["www.rafael.co.il"],
+        "redirects": 1
+      }
+    ],
+    "ipStats": [
+      {
+        "requests": 4,
+        "domains": ["www.rafael.co.il"],
+        "ip": "128.65.223.19",
+        "size": 43213,
+        "encodedSize": 14597,
+        "countries": ["DE"],
+        "index": 0,
+        "ipv6": false,
+        "redirects": 1,
+        "count": null,
+        "geoip": {
+          "country": "DE",
+          "region": "Hesse",
+          "city": "Regierungsbezirk Darmstadt",
+          "ll": [50, 8.75],
+          "country_name": "Germany"
+        },
+        "asn": {
+          "ip": "128.65.223.19",
+          "asn": "34309",
+          "country": "DE",
+          "description": "Link11 GmbH",
+          "name": "LINK11",
+          "org": "Link11 GmbH"
+        }
+      }
+    ],
+    "malicious": 0,
+    "protocolStats": [
+      {
+        "count": 4,
+        "size": 43213,
+        "encodedSize": 14597,
+        "ips": ["128.65.223.19"],
+        "countries": ["DE"],
+        "protocol": "http/1.1"
+      }
+    ],
+    "resourceStats": [
+      {
+        "count": 1,
+        "size": 575,
+        "encodedSize": 587,
+        "ips": ["128.65.223.19"],
+        "countries": ["DE"],
+        "compression": "-12",
+        "percentage": -0.02,
+        "type": "document"
+      },
+      {
+        "count": 1,
+        "size": 42406,
+        "encodedSize": 13778,
+        "ips": ["128.65.223.19"],
+        "countries": ["DE"],
+        "compression": "28628",
+        "percentage": 0.68,
+        "type": "script"
+      },
+      {
+        "count": 2,
+        "size": 232,
+        "encodedSize": 232,
+        "ips": ["128.65.223.19"],
+        "countries": ["DE"],
+        "compression": "0",
+        "percentage": 0,
+        "type": "other"
+      }
+    ],
+    "secureRequests": 4,
+    "tlsStats": [
+      {
+        "count": 2,
+        "size": 42981,
+        "encodedSize": 14365,
+        "ips": ["128.65.223.19"],
+        "countries": ["DE"],
+        "protocols": { "TLS 1.3 / AES_256_GCM": 2 },
+        "securityState": "secure"
+      }
+    ],
+    "serverStats": [
+      {
+        "count": 4,
+        "size": 43213,
+        "encodedSize": 14597,
+        "ips": ["128.65.223.19"],
+        "countries": ["DE"],
+        "server": "nginx"
+      }
+    ],
+    "securePercentage": 100,
+    "totalLinks": 0,
+    "uniqCountries": 1,
+    "uniqASNs": 1
+  },
+  "task": {
+    "uuid": "53fadffc-c3c6-412d-a5ba-80d979541f46",
+    "url": "https://www.rafael.co.il/",
+    "time": "2025-12-10T06:56:51.893Z",
+    "visibility": "unlisted",
+    "source": "api",
+    "method": "api",
+    "status": "finished",
+    "domain": "www.rafael.co.il",
+    "apexDomain": "rafael.co.il",
+    "reportURL": "https://radar.cloudflare.com/scan/53fadffc-c3c6-412d-a5ba-80d979541f46",
+    "screenshotURL": "https://api.cloudflare.com/client/v4/accounts/8afae000ea5d6226d71c3d8fcc8b60bc/urlscanner/v2/screenshots/53fadffc-c3c6-412d-a5ba-80d979541f46.png",
+    "domURL": "https://api.cloudflare.com/client/v4/accounts/8afae000ea5d6226d71c3d8fcc8b60bc/urlscanner/v2/dom/53fadffc-c3c6-412d-a5ba-80d979541f46",
+    "options": { "customHeaders": {}, "screenshotsResolutions": ["desktop"] },
+    "success": true,
+    "timeEnd": "2025-12-10T06:57:10.522Z"
+  },
+  "verdicts": {
+    "overall": {
+      "malicious": false,
+      "hasVerdicts": false,
+      "categories": [],
+      "tags": []
+    }
+  },
+  "submitter": { "country": "NL" }
+}
